@@ -159,6 +159,6 @@ export const theme = {
   nav_dropdown_panel: "absolute top-[calc(100%+8px)] left-0 w-64 rounded-2xl bg-[#1e2f61]/90 backdrop-blur-xl border border-white/10 shadow-2xl z-50 p-1.5 transition-all duration-200",
   nav_dropdown_item_active: "text-white bg-white/20 shadow-sm",
   nav_dropdown_item_inactive: "text-white/80 hover:text-white hover:bg-white/10",
-    
+  
   nav_button_login: "text-white px-5 py-2 rounded-full border border-white/20 font-medium text-sm transition-all duration-300 bg-white/5 hover:bg-white/20 hover:border-white/40 hover:shadow-[0_0_20px_rgba(255,255,255,0.15)]",
 };
