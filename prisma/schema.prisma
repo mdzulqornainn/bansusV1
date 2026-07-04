@@ -1,0 +1,332 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  ASDOS
+  CALON_ASDOS
+  LABORAN
+  DOSEN
+  GUEST
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  password      String
+
+  role           Role              @default(GUEST)
+  imageProfile   Image?
+  asdos          Asdos?
+  dosen          Dosen?
+  asdosApplicant AsdosApplication?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Asdos {
+  npm      String  @id @default(cuid())
+  userId   String  @unique
+  fileId   String? @unique
+  whatsapp String?
+  domisili String?
+  alasan   String?
+
+  suratPernyataan File?        @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classAsdos      ClassAsdos[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Dosen {
+  nip       String  @id @default(cuid())
+  userId    String? @unique
+  namaDosen String?
+
+  user       User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classDosen ClassDosen[]
+  repositori DataRepositori[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Image {
+  id       String  @id @default(uuid())
+  userId   String? @unique
+  namaFoto String
+  gambar   String
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Prodi {
+  id   String @id @default(uuid())
+  name String @unique
+
+  semester Semester[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Semester {
+  id             String @id @default(uuid())
+  semesterNumber Int
+  prodiId        String
+
+  prodi   Prodi    @relation(fields: [prodiId], references: [id], onDelete: Cascade)
+  courses Course[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([semesterNumber, prodiId])
+}
+
+model Course {
+  id         String  @id @default(uuid())
+  code       String
+  semesterId String
+  name       String
+  sks        Int?    @default(3)
+  kuota      Int?    @default(2)
+  status     String? @default("aktif")
+
+  semester          Semester            @relation(fields: [semesterId], references: [id], onDelete: Cascade)
+  class             Class[]
+  courseApplication CourseApplication[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Class {
+  id                String  @id @default(uuid())
+  courseId          String?
+  jadwalPraktikumId String? @unique
+  name              String
+
+  course          Course?          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  classAsdos      ClassAsdos[]
+  classDosen      ClassDosen[]
+  jadwalPraktikum JadwalPraktikum? @relation(fields: [jadwalPraktikumId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([courseId, name])
+}
+
+model JadwalPraktikum {
+  id      String  @id @default(uuid())
+  hari    String?
+  mulai   String?
+  selesai String?
+  ruangan String?
+
+  class Class?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ClassAsdos {
+  id       String @id @default(uuid())
+  classId  String
+  asdosNpm String
+
+  class   Class     @relation(fields: [classId], references: [id], onDelete: Cascade)
+  asdos   Asdos     @relation(fields: [asdosNpm], references: [npm], onDelete: Cascade)
+  absensi Absensi[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([classId, asdosNpm])
+}
+
+model ClassDosen {
+  id       String @id @default(uuid())
+  classId  String
+  dosenNip String
+
+  class Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+  dosen Dosen @relation(fields: [dosenNip], references: [nip], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([classId, dosenNip])
+}
+
+model Absensi {
+  id             String    @id @default(uuid())
+  classAsdosId   String
+  fileId         String    @unique
+  pertemuanKe    Int?
+  waktuKehadiran DateTime?
+  materi         String?   @default("materi...")
+  ruangan        String?
+
+  buktiKehadiran File?      @relation(fields: [fileId], references: [id])
+  ClassAsdos     ClassAsdos @relation(fields: [classAsdosId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([classAsdosId, pertemuanKe])
+}
+
+model ActiveAbsensi {
+  id              String @id @default(uuid())
+  pertemuanActive Int[]
+
+  updatedAt DateTime @updatedAt
+}
+
+model AsdosApplication {
+  id                      String  @id @default(uuid())
+  fileId                  String  @unique
+  userId                  String  @unique
+  jadwalWawancaraId       String?
+  npm                     String  @unique
+  whatsapp                String
+  domisili                String
+  wawancara               String  @default("offline")
+  alasanOnline            String?
+  alasan                  String
+  status                  String? @default("processing")
+  bersediaDuaMatkul       Boolean
+  pengalamanAsdos         Boolean
+  bersediaDitempatkanLain Boolean
+
+  courseApplicantion CourseApplication[]
+  suratPernyataan    File                @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jadwalWawancara    JadwalWawancara?    @relation(fields: [jadwalWawancaraId], references: [id], onDelete: Cascade)
+  penilaian          Penilaian?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Penilaian {
+  id                    String @id @default(uuid())
+  asdosApplicationId    String @unique
+  ketepatanMenjawabSoal Int?   @default(0)
+  penjelasanJawaban     Int?   @default(0)
+  wawancara             Int?   @default(0)
+  nilaiTotal            Int?   @default(0)
+
+  AsdosApplication AsdosApplication? @relation(fields: [asdosApplicationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model JadwalWawancara {
+  id      String  @id @default(uuid())
+  tanggal String? @default("Belum Diatur")
+  hari    String? @default("Belum Diatur")
+  jam     String? @default("Belum Diatur")
+  lokasi  String? @default("LAB LT3")
+
+  asdosApplication AsdosApplication[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CourseApplication {
+  id                 String @id @default(uuid())
+  asdosApplicationId String
+  courseId           String
+
+  course           Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  asdosApplication AsdosApplication @relation(fields: [asdosApplicationId], references: [id], onDelete: Cascade)
+
+  @@unique([asdosApplicationId, courseId])
+}
+
+model Folder {
+  id         String  @id @default(uuid())
+  parentId   String?
+  namaFolder String
+
+  file File[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model File {
+  id           String  @id @default(uuid())
+  folderId     String?
+  namaFile     String
+  linkView     String
+  linkDownload String
+
+  asdos            Asdos[]
+  asdosApplication AsdosApplication[]
+  absensi          Absensi?
+  folder           Folder?            @relation(fields: [folderId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model DataRepositori {
+  id               String  @id @default(uuid())
+  dosenNip         String?
+  thumbnail        String?
+  namaDataset      String
+  namaPemilik      String
+  jenisDataset     String
+  linkPublikasi    String
+  linkRepositori   String
+  deskripsiDataset String?
+  status           String  @default("pending")
+
+  dosen Dosen? @relation(fields: [dosenNip], references: [nip])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  id      String   @id @default(uuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model PasswordResetToken {
+  id      String   @id @default(uuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model GoogleRefreshToken {
+  id    String @id @default(uuid())
+  token String
+}
