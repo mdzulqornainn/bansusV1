@@ -7,19 +7,15 @@ export const formatIndoDate = (date: Date | string | null | undefined): string =
   });
 };
 
-/**
- * LOGIKA UTAMA: Menentukan apakah status pendaftaran aktif (BUKA atau TUTUP)
- * Mengecek keaktifan sakelar Master Switch serta rentang waktu pendaftaran saat ini.
- */
+
+
 export function isOprecOpen(dbData: any): boolean {
-  // Jika master switch dimatikan manual oleh admin, pendaftaran otomatis tutup
   if (!dbData || !dbData.status) return false;
 
   const now = new Date();
   const start = new Date(dbData.recStart);
   const end = new Date(dbData.recEnd);
   
-  // Ambil jendela waktu perpanjangan jika dikonfigurasi oleh admin
   const exStart = dbData.recExStart ? new Date(dbData.recExStart) : null;
   const exEnd = dbData.recExEnd ? new Date(dbData.recExEnd) : null;
 
@@ -29,10 +25,7 @@ export function isOprecOpen(dbData: any): boolean {
   return isMainPeriodActive || isExtensionPeriodActive;
 }
 
-/**
- * MAPPING HERO INFO: Mengembalikan label tanggal untuk komponen Badge Periode di Hero Section.
- * Jika ada perpanjangan waktu, batas penutupan otomatis bergeser mengikuti tanggal extended.
- */
+
 export function mapDBToHeroInfo(dbData: any) {
   if (!dbData) return { startLabel: "-", endLabel: "-" };
 
@@ -42,10 +35,6 @@ export function mapDBToHeroInfo(dbData: any) {
   };
 }
 
-/**
- * MAPPING TIMELINE: Mengubah baris data tunggal dari database menjadi array terstruktur
- * untuk disuplai langsung ke dalam komponen <TimelineSection /> secara dinamis.
- */
 export function mapDBToTimeline(dbData: any) {
   if (!dbData) return [];
 
@@ -53,27 +42,38 @@ export function mapDBToTimeline(dbData: any) {
     {
       title: "Pendaftaran Utama",
       date: `${formatIndoDate(dbData.recStart)} - ${formatIndoDate(dbData.recEnd)}`,
+      description: "Periode pengisian formulir dan unggah berkas administrasi utama.",
+      status: "scheduled" as any,
     },
-    // Blok perpanjangan hanya akan muncul di linimasa jika diisi oleh admin
     ...(dbData.recExStart ? [{
       title: "Masa Perpanjangan (Extend)",
       date: `${formatIndoDate(dbData.recExStart)} - ${formatIndoDate(dbData.recExEnd)}`,
+      description: "Waktu tambahan bagi pendaftar yang belum sempat melengkapi berkas.",
+      status: "scheduled" as any,
     }] : []),
     {
       title: "Seleksi Administrasi",
       date: formatIndoDate(dbData.seleksiAdmin),
+      description: "Proses verifikasi berkas dan dokumen kelayakan oleh tim laboratorium.",
+      status: "scheduled" as any,
     },
     {
       title: "Jadwal Wawancara",
       date: `${formatIndoDate(dbData.wawancaraStart)} - ${formatIndoDate(dbData.wawancaraEnd)}`,
+      description: "Uji kompetensi teknis dan kesiapan komitmen tatap muka / online.",
+      status: "scheduled" as any,
     },
     {
       title: "Tanggal Pengumuman",
       date: formatIndoDate(dbData.pengumuman),
+      description: "Perilisan daftar nama mahasiswa yang lolos menjadi asisten dosen.",
+      status: "scheduled" as any,
     },
     {
       title: "Periode Orientasi",
       date: `${formatIndoDate(dbData.orientasiStart)} - ${formatIndoDate(dbData.orientasiEnd)}`,
+      description: "Pembekalan teknis prapembelajaran dan pembagian kelas laboratorium.",
+      status: "scheduled" as any,
     },
   ];
 }
