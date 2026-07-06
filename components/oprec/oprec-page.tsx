@@ -1,17 +1,15 @@
-import { Button } from "@/components/ui/button";
 import {
   benefits,
   requirements,
   timeline,
   timelineOprec
 } from "@/data/static-data";
-import { ChevronRight, Download, Zap } from "lucide-react";
 
+import { HeroSection } from "@/components/oprec/hero";
 import { RequirementsSection } from "@/components/oprec/requirement";
 import { MatkulSection } from "@/components/oprec/subject";
 import { TimelineSection } from "@/components/oprec/timeline";
-import { theme } from "@/lib/theme";
-import { TGetProdis, TGetCourses } from "@/lib/types";
+import { TGetProdis } from "@/lib/types";
 
 interface OprecPageProps {
   dataProdis: TGetProdis;
@@ -44,7 +42,7 @@ const OprecPage = ({ dataProdis }: OprecPageProps) => {
       description: "Posisi Tersedia",
     },
     {
-      value: count_matkul,
+      value: `${count_matkul}`,
       description: "Mata Kuliah",
     },
     {
@@ -53,84 +51,42 @@ const OprecPage = ({ dataProdis }: OprecPageProps) => {
     },
   ];
   return (
-    <>
-      <section className="pt-32 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <div className={`inline-flex items-center bg-white/10 border ${theme.hover_glow_light} rounded-full px-6 py-2 mb-8 backdrop-blur`}>
-              <Zap className={`w-4 h-4 ${theme.text_title} mr-2`} />
-              <span className={`${theme.text_title} text-sm`}>
-                Periode Pendaftaran: {timelineOprec.start} - {timelineOprec.end}
-              </span>
-            </div>
-            <h1 className={`text-5xl md:text-7xl font-bold ${theme.text_gradasi_cyan_sky} mb-8 leading-tight`}>
-              <span className="">
-                Open Recruitment
-              </span>
-              <br />
-              Asisten Dosen {new Date().getFullYear()}
-            </h1>
+    <div className="min-h-screen relative isolate overflow-x-hidden bg-slate-50/40">
+      <style>{`
+        .unila-dot-matrix {
+          background-image: radial-gradient(rgba(11, 94, 168, 0.18) 2px, transparent 2px);
+          background-size: 2.5rem 2.5rem;
+        }
+        .neon-glow {
+          background-image: radial-gradient(circle, rgba(11, 94, 168, 0.35) 100%, transparent 100%);
+          filter: blur(100px);
+        }
+      `}</style>
+    
+      <div className="absolute inset-0 unila-dot-matrix pointer-events-none z-[-1]"></div>
+      <div className="absolute top-[-5%] left-[-5%] w-[650px] h-[650px] neon-glow opacity-60 pointer-events-none z-[-1] animate-pulse [animation-duration:12s]"></div>
+      <div className="absolute top-[25%] right-[-10%] w-[650px] h-[650px] neon-glow opacity-50 pointer-events-none z-[-1] animate-pulse [animation-duration:16s]"></div>
+      <div className="absolute top-[60%] left-[-10%] w-[650px] h-[650px] neon-glow opacity-50 pointer-events-none z-[-1] animate-pulse [animation-duration:16s]"></div>
+      <div className="absolute top-[80%] right-[-10%] w-[650px] h-[650px] neon-glow opacity-50 pointer-events-none z-[-1] animate-pulse [animation-duration:16s]"></div>
 
-            <p className={`text-xl ${theme.text_default} mb-12 max-w-3xl mx-auto leading-relaxed`}>
-              Bergabunglah dengan tim asdos terbaik! Kesempatan emas untuk
-              mengembangkan kemampuan mengajar sambil mendapat penghasilan yang
-              kompetitif.
-            </p>
+      <div className="relative z-10">
+        <HeroSection 
+          timelineOprec={timelineOprec}
+          informationHero={informationHero}
+          title="Open Recruitment"
+          subtitle="Bergabunglah dengan tim asdos terbaik! Kesempatan emas untuk mengembangkan kemampuan mengajar sambil mendapat penghasilan yang kompetitif."
+          year={new Date().getFullYear()}
+          registrationLink="/oprec/daftar"
+          guideDownloadLink="/files/surat-pernyataan.docx"
+        />
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <TimelineSection timeline={[...timeline]} />
 
-              {/* Oprec Ditutup */}
-              
-              {/* <h3 className={`text-l md:text-2xl font-bold ${theme.status_warning} hover:bg-red-500 transition-all duration-300 ease-in-out transform mb-8 leading-tight`}>Oprec Belum Dibuka</h3> */}
+        <RequirementsSection requirements={requirements} benefits={benefits} />
 
-
-              {/* Tombol Daftar */}
-
-              <Button // INI ADA KELASNYA SENDIRI DI button.tsx
-                href="/oprec/daftar"
-                size="lg"
-                className={``}
-              >
-                Daftar Sekarang
-                <ChevronRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
-              </Button>
-
-
-
-              {/* Surat Pernyataan disini */}
-
-              <Button
-                variant="secondary"
-                size="lg"
-                href="/files/surat-pernyataan.docx"
-                download
-              >
-                <Download className={`w-5 h-5 mr-2`} />
-                Download Surat Pernyataan
-              </Button>
-            </div>
-          </div>
-
-          {/* Quick Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
-            {informationHero.map((item, index) => (
-              <div className="text-center" key={index}>
-                <div className={`text-4xl md:text-5xl font-bold ${theme.text_title} mb-2`}>
-                  {item.value}
-                </div>
-                <div className={`${theme.text_default}`}>{item.description}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <TimelineSection timeline={[...timeline]} />
-
-      <RequirementsSection requirements={requirements} benefits={benefits} />
-
-      <MatkulSection dataProdis={dataProdis} />
-    </>
+        <MatkulSection dataProdis={dataProdis} />
+      </div>
+    </div>
   );
 };
 
