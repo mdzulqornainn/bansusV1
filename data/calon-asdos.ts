@@ -3,6 +3,7 @@
 import { FormDataUpdatePendaftar } from "@/lib/interfaces";
 import { prisma } from "@/lib/prisma";
 import { updateTag } from "next/cache";
+import { createFolderForAsdos } from "@/lib/drives";
 
 // ------------------------ READ FUNCTION ------------------------
 export const getAsdosApplications = async () => {
@@ -48,7 +49,6 @@ export const updateAsdosApplication = async (
   data: FormDataUpdatePendaftar
 ) => {
   try {
-    // 🌟 GANTI ke findFirst untuk mendapatkan data unik (mengambil yang terbaru)
     const asdosApplication = await prisma.asdosApplication.findFirst({
       where: { npm },
       orderBy: { createdAt: "desc" }
@@ -56,7 +56,7 @@ export const updateAsdosApplication = async (
 
     if (!asdosApplication) return { error: "Data tidak ditemukan" };
 
-    // 🌟 GANTI ke update dengan ID (karena ID adalah kunci unik yang pasti)
+    // 1. Update status di tabel AsdosApplication
     await prisma.asdosApplication.update({
       data: {
         whatsapp: data.whatsapp,
@@ -68,9 +68,60 @@ export const updateAsdosApplication = async (
       where: { id: asdosApplication.id }, 
     });
 
-    // ... (sisa logika status accepted/rejected tetap sama)
-    // Pastikan penggunaan asdos.findUnique juga menggunakan npm (jika npm unik di tabel Asdos)
-    // Jika tabel Asdos juga compound, gunakan id
+    // 2. Logic jika diterima (Accepted)
+    if (data.status === "accepted") {
+      const asdos = await prisma.asdos.findUnique({ where: { npm } });
+      
+      // Buat record Asdos jika belum ada
+      if (!asdos) {
+        const newAsdos = await prisma.asdos.create({
+          data: {
+            npm,
+            userId: asdosApplication.userId,
+            fileId: asdosApplication.fileId,
+            whatsapp: asdosApplication.whatsapp,
+            domisili: asdosApplication.domisili,
+            alasan: asdosApplication.alasan,
+          },
+        });
+
+        // 🌟 OTOMATISASI: Buat folder Google Drive
+        try {
+          const user = await prisma.user.findUnique({ where: { id: asdosApplication.userId } });
+          const folderName = user?.name ? `${user.name} - ${npm}` : `Asdos - ${npm}`;
+          
+          const folderRes = await createFolderForAsdos(folderName);
+
+          if (folderRes.data?.id) {
+            await prisma.asdos.update({
+              where: { npm },
+              data: { driveFolderId: folderRes.data.id },
+            });
+          }
+        } catch (driveError) {
+          console.error("Gagal membuat folder Google Drive:", driveError);
+          // Kita tidak melempar error agar proses update status tetap sukses
+        }
+        updateTag("asdos");
+      }
+
+      // Update role user
+      await prisma.user.update({
+        where: { id: asdosApplication.userId },
+        data: { role: "ASDOS" },
+      });
+      updateTag("current-user");
+      updateTag("user");
+
+    } else if (data.status === "rejected") {
+      // Update role user kembali ke CALON_ASDOS jika ditolak
+      await prisma.user.update({
+        where: { id: asdosApplication.userId },
+        data: { role: "CALON_ASDOS" },
+      });
+      updateTag("current-user");
+      updateTag("user");
+    }
     
     updateTag("asdos-application");
     updateTag(`asdos-application-${npm}`);
@@ -79,7 +130,6 @@ export const updateAsdosApplication = async (
     return { error: "Data gagal diupdate" };
   }
 };
-
 // ------------------------ DELETE FUNCTION ------------------------
 export const deleteAsdosApplication = async (npm: string) => {
   try {
