@@ -51,9 +51,18 @@ export type TGetCourses = Prisma.PromiseReturnType<typeof getCourses>;
 export type TGetAsdosApplications = Prisma.PromiseReturnType<
   typeof getAsdosApplications
 >;
-export type TGetAsdosApplication = Prisma.PromiseReturnType<
-  typeof getAsdosApplication
->;
+export type TGetAsdosApplication = (Prisma.AsdosApplicationGetPayload<{
+  include: {
+    user: true;
+    suratPernyataan: true;
+    courseApplicantion: {
+      include: {
+        course: true;
+      };
+    };
+  };
+}>) | null;
+
 export type TGetUsers = Prisma.PromiseReturnType<typeof getUsers>;
 export type TGetAsdoss = Prisma.PromiseReturnType<typeof getAsdoss>;
 export type TGetAsdos = Prisma.PromiseReturnType<typeof getAsdos>;
@@ -81,3 +90,5 @@ export type TGetRepositoriDataById = Prisma.PromiseReturnType<
 export type TGetRepositoriDatas = Prisma.PromiseReturnType<
   typeof getRepositoriDatas
 >;
+
+

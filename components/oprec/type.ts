@@ -37,3 +37,4 @@ export interface SubjectCategory {
   icon: React.ReactNode;
   courses: Course[];
 }
+
