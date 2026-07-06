@@ -3,13 +3,6 @@
 import { useState } from "react";
 import {
   Search,
-  Image,
-  FileText,
-  Video,
-  Music,
-  Table2,
-  Package,
-  BookOpen,
   ChevronLeft,
   ChevronRight,
   FileStack,
@@ -18,6 +11,35 @@ import {
 } from "lucide-react";
 import { TGetRepositoriDatas } from "@/lib/types";
 import { theme } from "@/lib/theme";
+
+import { 
+  Image as ImageIcon, 
+  FileText, 
+  Video, 
+  Music, 
+  Table2, 
+  Package 
+} from "lucide-react";
+
+interface TypeIconProps {
+  type: string;
+  size?: number;
+}
+
+const TypeIcon = ({ type, size = 24 }: TypeIconProps) => {
+  const lowerType = type.toLowerCase();
+  if (lowerType.includes("image") || lowerType.includes("png") || lowerType.includes("jpg"))
+    return <ImageIcon size={size} className={`${theme.text_fmipa}`} />;
+  if (lowerType.includes("pdf") || lowerType.includes("doc") || lowerType.includes("text"))
+    return <FileText size={size} className={`${theme.text_fmipa}`} />;
+  if (lowerType.includes("video") || lowerType.includes("mp4"))
+    return <Video size={size} className={`${theme.text_fmipa}`} />;
+  if (lowerType.includes("audio") || lowerType.includes("mp3"))
+    return <Music size={size} className={`${theme.text_fmipa}`} />;
+  if (lowerType.includes("csv") || lowerType.includes("excel") || lowerType.includes("xls") || lowerType.includes("sheet"))
+    return <Table2 size={size} className={`${theme.text_fmipa}`} />;
+  return <Package size={size} className={`${theme.text_fmipa}`} />;
+};
 
 interface RepositoriPageProps {
   dataRepositori: TGetRepositoriDatas;
@@ -55,166 +77,118 @@ export default function RepositoriPage({
   });
 
   // Pagination
-  const startIndex = (page - 1) * perPage;
-  const paginatedData = filteredData?.slice(startIndex, startIndex + perPage);
   const totalPage = Math.ceil((filteredData?.length || 0) / perPage);
-
-  // Reset page when filter changes
-  const handleTypeChange = (type: string) => {
-    setSelectedType(type);
-    setPage(1);
-  };
-
-  // Warna badge berdasarkan jenis dataset
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case "Gambar":
-        return "bg-gradient-to-br from-blue-50 to-blue-100 text-blue-700 border-blue-200";
-      case "Text":
-        return "bg-gradient-to-br from-emerald-50 to-emerald-100 text-emerald-700 border-emerald-200";
-      case "Video":
-        return "bg-gradient-to-br from-rose-50 to-rose-100 text-rose-700 border-rose-200";
-      case "Suara":
-        return "bg-gradient-to-br from-purple-50 to-purple-100 text-purple-700 border-purple-200";
-      case "Table":
-        return "bg-gradient-to-br from-amber-50 to-amber-100 text-amber-700 border-amber-200";
-      default:
-        return "bg-gradient-to-br from-gray-50 to-gray-100 text-gray-700 border-gray-200";
-    }
-  };
-
-  // Type icon component
-  const TypeIcon = ({ type, size = 24 }: { type: string; size?: number }) => {
-    const iconProps = { size, strokeWidth: 2 };
-    switch (type) {
-      case "Gambar":
-        return <Image {...iconProps} />;
-      case "Text":
-        return <FileText {...iconProps} />;
-      case "Video":
-        return <Video {...iconProps} />;
-      case "Suara":
-        return <Music {...iconProps} />;
-      case "Table":
-        return <Table2 {...iconProps} />;
-      default:
-        return <Package {...iconProps} />;
-    }
-  };
+  const start = (page - 1) * perPage;
+  const end = start + perPage;
+  const paginatedData = filteredData?.slice(start, end);
 
   return (
-    <main
-      className={`min-h-screen ${theme.root_background} bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 px-4 sm:px-6 lg:px-8 py-16`}
-    >
+    <main className="min-h-screen relative isolate overflow-x-hidden py-24 px-4 sm:px-6 lg:px-8 relative z-10 selection:bg-[#0b5ea8]/30">
+    <style>{`
+      .unila-dot-matrix {
+        background-image: radial-gradient(rgba(11, 94, 168, 0.18) 2px, transparent 2px);
+        background-size: 2.5rem 2.5rem;
+      }
+      .neon-glow {
+        background-image: radial-gradient(circle, rgba(11, 94, 168, 0.35) 100%, transparent 100%);
+        filter: blur(100px);
+      }
+    `}</style>
+  
+    <div className="absolute inset-0 unila-dot-matrix pointer-events-none z-[-1]"></div>
+    <div className="absolute top-[-5%] left-[-5%] w-[650px] h-[650px] neon-glow opacity-50 pointer-events-none z-[-1] animate-pulse [animation-duration:12s]"></div>
+    <div className="absolute top-[25%] right-[-10%] w-[650px] h-[650px] neon-glow opacity-50 pointer-events-none z-[-1] animate-pulse [animation-duration:12s]"></div>
       <div className="max-w-7xl mx-auto space-y-12">
         {/* Header Section */}
-        <div className="text-center space-y-6">
-          <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full border border-indigo-100 shadow-sm">
-            <BookOpen className="w-5 h-5 text-indigo-600" />
-            <span className="text-sm font-semibold text-indigo-600">
-              {filteredData?.length || 0} Dataset Tersedia
-            </span>
+        <div className="text-center space-y-4 max-w-3xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#0b5ea8]/10 border border-[#0b5ea8]/20 rounded-full text-xs font-semibold text-[#0b5ea8] backdrop-blur-md shadow-xs">
+            <FileStack className="w-3.5 h-3.5" />
+            <span>Pusat Data & Riset Akademik FMIPA</span>
           </div>
-
-          <h1
-            className={`text-5xl sm:text-6xl font-bold ${theme.text_default_blue}`}
-          >
-            Repositori Dataset
+          <h1 className="text-4xl sm:text-5xl font-black text-slate-800 tracking-tight leading-tight">
+            Repository{" "}
+            <span className="bg-gradient-to-r from-[#0B5EA8] to-cyan-600 bg-clip-text text-transparent">
+              Dataset
+            </span>
           </h1>
-
-          <p
-            className={`text-lg ${theme.text_default} max-w-3xl mx-auto leading-relaxed`}
-          >
-            Jelajahi koleksi dataset berkualitas untuk penelitian, skripsi, dan
-            proyek machine learning Anda. Semua data telah dipublikasikan dan
-            siap digunakan.
+          <p className="text-base sm:text-lg text-slate-500 font-medium leading-relaxed">
+            Akses dan unduh kumpulan data penelitian sivitas akademika untuk
+            mendukung pengembangan riset sains dan teknologi terintegrasi.
           </p>
         </div>
 
         {/* Search & Filter Section */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200 shadow-xl p-6 space-y-4">
+        <div className="bg-white/70 backdrop-blur-xl border border-white/60 rounded-2xl p-6 shadow-[0_8px_30px_rgba(11,94,168,0.02)] space-y-6">
           {/* Search Bar */}
-          <div className="relative">
-            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-              <Search className="w-5 h-5 text-gray-400" />
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <Search className="w-5 h-5 text-slate-400 group-focus-within:text-[#0b5ea8] transition-colors duration-200" />
             </div>
             <input
               type="text"
-              placeholder="Cari berdasarkan nama dataset, deskripsi, atau pemilik..."
+              placeholder="Cari judul dataset, deskripsi, atau nama peneliti..."
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
                 setPage(1);
               }}
-              className="w-full pl-12 pr-4 py-4 bg-white border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 transition-all outline-none text-gray-700 placeholder-gray-400"
+              className="w-full pl-11 pr-4 py-3.5 bg-white/60 border border-slate-200 text-slate-800 placeholder-slate-400 rounded-xl focus:outline-none focus:ring-4 focus:ring-[#0b5ea8]/10 focus:border-[#0b5ea8] transition-all duration-200 font-medium text-sm shadow-xs"
             />
           </div>
 
           {/* Filter Chips */}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100/80">
             {datasetTypes.map((type) => (
               <button
                 key={type}
-                onClick={() => handleTypeChange(type)}
-                className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-2 ${
+                onClick={() => {
+                  setSelectedType(type);
+                  setPage(1);
+                }}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 capitalize tracking-wide cursor-pointer shadow-xs ${
                   selectedType === type
-                    ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200 scale-105"
-                    : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
+                    ? "bg-[#0b5ea8] text-white shadow-md shadow-[#0b5ea8]/20 scale-[1.02]"
+                    : "bg-white text-slate-600 border border-slate-200/80 hover:bg-slate-50 hover:text-slate-800 hover:border-slate-300"
                 }`}
               >
-                {type !== "all" && <TypeIcon type={type} size={16} />}
-                {type === "all" ? "Semua Dataset" : type}
+                {type === "all" ? "Semua Kategori" : type}
               </button>
             ))}
           </div>
         </div>
 
         {/* Empty State */}
-        {(!paginatedData || paginatedData.length === 0) && (
-          <div className="bg-white/60 backdrop-blur-sm rounded-2xl border-2 border-dashed border-gray-300 p-16 text-center">
-            <Package className="w-24 h-24 mx-auto mb-6 text-gray-300" />
-            <h3 className="text-2xl font-bold text-gray-700 mb-3">
-              {searchTerm || selectedType !== "all"
-                ? "Dataset Tidak Ditemukan"
-                : "Belum Ada Dataset"}
+        {!paginatedData || paginatedData.length === 0 ? (
+          <div className="text-center py-20 bg-white/50 backdrop-blur-md border border-dashed border-slate-200 rounded-2xl max-w-md mx-auto shadow-xs">
+            <div className="inline-flex items-center justify-center w-12 h-12 bg-slate-100 text-slate-400 rounded-xl mb-4">
+              <Search className="w-6 h-6" />
+            </div>
+            <h3 className="text-base font-bold text-slate-700 mb-1">
+              Dataset Tidak Ditemukan
             </h3>
-            <p className="text-gray-500 max-w-md mx-auto mb-6">
-              {searchTerm || selectedType !== "all"
-                ? "Coba gunakan kata kunci lain atau pilih kategori berbeda untuk menemukan dataset yang Anda cari"
-                : "Dataset akan muncul di sini setelah ditambahkan ke repositori"}
+            <p className="text-xs font-medium text-slate-400 max-w-xs mx-auto">
+              Tidak ada data yang cocok dengan kriteria pencarian Anda saat ini.
             </p>
-            {(searchTerm || selectedType !== "all") && (
-              <button
-                onClick={() => {
-                  setSearchTerm("");
-                  setSelectedType("all");
-                  setPage(1);
-                }}
-                className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium"
-              >
-                Reset Filter
-              </button>
-            )}
           </div>
-        )}
-
-        {/* Grid Cards */}
-        {paginatedData && paginatedData.length > 0 && (
+        ) : (
           <>
+            {/* Grid Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {paginatedData.map((data) => (
                 <div
                   key={data.id}
-                  className={`group bg-white rounded-2xl border border-gray-200 shadow-md ${theme.hover_default} overflow-hidden flex flex-col`}
+                  className={`group bg-white/70 backdrop-blur-xl border border-white/60 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.01)] hover:shadow-[0_16px_35px_rgba(11,94,168,0.08)] hover:border-[#0b5ea8]/30 hover:bg-white/95 transition-all duration-300 overflow-hidden flex flex-col`}
                 >
                   {/* Thumbnail */}
-                  <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                  <div className="relative h-48 bg-gradient-to-br from-slate-50 to-slate-100 border-b border-slate-100 overflow-hidden flex items-center justify-center">
+                    <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#0b5ea8_1px,transparent_1px)] [background-size:12px_12px] pointer-events-none" />
+
                     {data.thumbnail ? (
                       <>
                         <img
                           src={data.thumbnail}
                           alt={data.namaDataset}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 relative z-10"
                           onError={(e) => {
                             e.currentTarget.style.display = "none";
                             const fallback = e.currentTarget
@@ -222,76 +196,59 @@ export default function RepositoriPage({
                             if (fallback) fallback.classList.remove("hidden");
                           }}
                         />
-                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100">
-                          <div className="text-center">
-                            <TypeIcon type={data.jenisDataset} size={48} />
-                            <p className="text-sm font-medium text-gray-500 mt-2">
+                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#0b5ea8]/5 to-indigo-500/10 hidden">
+                          <div className="text-center p-4">
+                            <div className="inline-flex p-3 bg-white border border-slate-100 rounded-2xl shadow-xs text-[#0b5ea8] transform group-hover:scale-105 transition-transform duration-300">
+                              <TypeIcon type={data.jenisDataset} size={40} />
+                            </div>
+                            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mt-3">
                               {data.jenisDataset}
                             </p>
                           </div>
                         </div>
                       </>
                     ) : (
-                      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100">
-                        <div className="text-center">
-                          <TypeIcon type={data.jenisDataset} size={48} />
-                          <p className="text-sm font-medium text-gray-500 mt-2">
+                      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#0b5ea8]/5 to-indigo-500/10">
+                        <div className="text-center p-4">
+                          <div className="inline-flex p-3 bg-white border border-slate-100 rounded-2xl shadow-xs text-[#0b5ea8] transform group-hover:scale-105 transition-transform duration-300">
+                            <TypeIcon type={data.jenisDataset} size={40} />
+                          </div>
+                          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mt-3">
                             {data.jenisDataset}
                           </p>
                         </div>
                       </div>
                     )}
-
-                    {/* Badge Overlay */}
-                    <div className="absolute top-3 right-3">
-                      <span
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold border backdrop-blur-sm flex items-center gap-1 ${getTypeColor(
-                          data.jenisDataset
-                        )} shadow-lg`}
-                      >
-                        <TypeIcon type={data.jenisDataset} size={14} />
-                        {data.jenisDataset}
-                      </span>
-                    </div>
                   </div>
 
                   {/* Content */}
-                  <div className="p-6 flex-1 flex flex-col">
-                    <h2 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-indigo-600 transition-colors leading-tight">
-                      {data.namaDataset}
-                    </h2>
-
-                    {/* Owner Info */}
-                    <div className="flex items-center gap-3 mb-4 pb-4 border-b border-gray-100">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold shadow-md">
-                        {data.namaPemilik.charAt(0).toUpperCase()}
+                  <div className="p-6 flex-1 flex flex-col justify-between">
+                    <div className="space-y-2.5">
+                      <div className="flex justify-between items-center">
+                        <span className="px-2.5 py-1 bg-slate-100 border border-slate-200/50 rounded-lg text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                          {data.jenisDataset}
+                        </span>
                       </div>
-                      <div>
-                        <p className="text-sm font-semibold text-gray-700">
-                          {data.namaPemilik}
-                        </p>
-                        <p className="text-xs text-gray-500 flex items-center gap-1">
-                          <User size={12} />
-                          Kontributor
-                        </p>
-                      </div>
+                      <h3 className="text-base font-bold text-slate-800 tracking-tight group-hover:text-[#0b5ea8] transition-colors duration-200 line-clamp-2 leading-snug">
+                        {data.namaDataset}
+                      </h3>
+                      <p className="text-xs font-medium text-slate-400 line-clamp-3 text-justify leading-relaxed">
+                        {data.deskripsiDataset ||
+                          "Tidak ada deskripsi tambahan yang disematkan untuk berkas penelitian repositori ini."}
+                      </p>
                     </div>
 
-                    {/* Description */}
-                    <p
-                      className={`text-sm ${theme.text_default} line-clamp-3 mb-4 flex-1 leading-relaxed`}
-                    >
-                      {data.deskripsiDataset ||
-                        "Tidak ada deskripsi tersedia untuk dataset ini."}
-                    </p>
+                    <div className="border-t border-slate-100/80 pt-4 mt-6 flex items-center justify-between">
+                      <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 max-w-[65%]">
+                        <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span className="truncate">{data.namaPemilik}</span>
+                      </div>
 
-                    {/* Actions */}
-                    <div className="flex gap-3 pt-4 border-t border-gray-100">
                       <a
                         href={data.linkPublikasi}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-medium text-sm group/link"
+                        className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0b5ea8] hover:text-white bg-[#0b5ea8]/5 hover:bg-[#0b5ea8] px-3 py-1.5 rounded-lg transition-all duration-200 shadow-xs cursor-pointer"
                       >
                         <FileStack className="w-4 h-4 group-hover/link:scale-110 transition-transform" />
                         Jurnal
@@ -304,6 +261,7 @@ export default function RepositoriPage({
                       >
                         <ExternalLink className="w-4 h-4 group-hover/link:scale-110 transition-transform" />
                         Akses
+                        <ExternalLink className="w-3.5 h-3.5" />
                       </a>
                     </div>
                   </div>
@@ -313,32 +271,32 @@ export default function RepositoriPage({
 
             {/* Pagination */}
             {totalPage > 1 && (
-              <div className="flex items-center justify-center gap-4 pt-8">
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-slate-100 pt-6">
                 <button
                   onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
                   disabled={page === 1}
-                  className="flex items-center gap-2 px-5 py-3 bg-white text-gray-700 rounded-xl border-2 border-gray-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 hover:border-indigo-300 transition-all font-medium shadow-sm"
+                  className="flex items-center gap-1.5 px-4 py-2 bg-white text-xs font-bold text-slate-600 rounded-xl border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 hover:text-slate-800 transition-all duration-150 shadow-xs cursor-pointer w-full sm:w-auto justify-center"
                 >
-                  <ChevronLeft className="w-5 h-5" />
+                  <ChevronLeft className="w-4 h-4" />
                   Sebelumnya
                 </button>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 flex-wrap justify-center">
                   {Array.from({ length: totalPage }, (_, i) => i + 1).map(
                     (pageNum) => {
                       if (
                         pageNum === 1 ||
                         pageNum === totalPage ||
-                        Math.abs(pageNum - page) <= 1
+                        (pageNum >= page - 1 && pageNum <= page + 1)
                       ) {
                         return (
                           <button
                             key={pageNum}
                             onClick={() => setPage(pageNum)}
-                            className={`w-12 h-12 rounded-xl font-bold transition-all ${
+                            className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all duration-150 cursor-pointer ${
                               page === pageNum
-                                ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-200 scale-110"
-                                : "bg-white text-gray-600 hover:bg-gray-50 border-2 border-gray-200"
+                                ? "bg-[#0b5ea8] text-white shadow-sm shadow-[#0b5ea8]/20 scale-105"
+                                : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
                             }`}
                           >
                             {pageNum}
@@ -348,7 +306,7 @@ export default function RepositoriPage({
                         return (
                           <span
                             key={pageNum}
-                            className="text-gray-400 font-bold"
+                            className="text-slate-400 font-bold px-0.5 text-xs"
                           >
                             ...
                           </span>
@@ -364,10 +322,10 @@ export default function RepositoriPage({
                     setPage((prev) => Math.min(prev + 1, totalPage))
                   }
                   disabled={page === totalPage}
-                  className="flex items-center gap-2 px-5 py-3 bg-white text-gray-700 rounded-xl border-2 border-gray-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 hover:border-indigo-300 transition-all font-medium shadow-sm"
+                  className="flex items-center gap-1.5 px-4 py-2 bg-white text-xs font-bold text-slate-600 rounded-xl border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 hover:text-slate-800 transition-all duration-150 shadow-xs cursor-pointer w-full sm:w-auto justify-center"
                 >
                   Berikutnya
-                  <ChevronRight className="w-5 h-5" />
+                  <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
             )}

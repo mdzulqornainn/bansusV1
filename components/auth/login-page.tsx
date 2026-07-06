@@ -50,163 +50,170 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto pt-32 pb-20  flex flex-col min-h-screen items-center justify-center px-4 sm:px-6 lg:px-8">
-      <div className="max-w-xl w-full">
-        <div className={`bg-black/40 backdrop-blur-sm border ${theme.border_outside} rounded-2xl p-8 shadow-2xl`}>
-          {/* Login Header */}
-          <div className="text-center mb-8">
-            <h1 className={`text-3xl font-bold ${theme.text_title} brightness-105 mb-2`}>
-              Masuk ke Akun
-            </h1>
-            <p className={`text-white`}>
-              Silakan masuk untuk mengakses dashboard Anda
-            </p>
-            <div className={`w-16 h-1 bg-sky-400 mx-auto mt-4`}></div>
-          </div>
+    <div className={`min-h-screen relative isolate overflow-x-hidden ${theme.root_background} flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 pt-32 pb-20`}>
+      <style>{`
+         .unila-dot-matrix {
+           background-image: radial-gradient(rgba(11, 94, 168, 0.18) 2px, transparent 2px);
+           background-size: 2.5rem 2.5rem;
+         }
+         .neon-glow {
+           background-image: radial-gradient(circle, rgba(11, 94, 168, 0.35) 100%, transparent 100%);
+           filter: blur(100px);
+         }
+       `}</style>
+     
+       <div className="absolute inset-0 unila-dot-matrix pointer-events-none z-[-1]"></div>
+       <div className="absolute top-[-5%] left-[-5%] w-[650px] h-[650px] neon-glow opacity-50 pointer-events-none z-[-1] animate-pulse [animation-duration:12s]"></div>
+       <div className="absolute top-[30%] right-[-10%] w-[650px] h-[650px] neon-glow opacity-50 pointer-events-none z-[-1] animate-pulse [animation-duration:12s]"></div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* Email Field */}
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-white font-semibold mb-3"
-              >
-                Email <span className={`${theme.text_title}`}>*</span>
-              </label>
-              <div className="relative">
-                <input
-                  {...register("email")}
-                  type="email"
-                  className={`w-full px-4 py-3 pl-12 bg-black/50 border rounded-lg focus:outline-none text-white placeholder-gray-300 transition-all duration-200 ${errors.email?.message
-                    ? "border-red-400"
-                    : `${theme.highlight_focus}`
-                    }`}
-                  placeholder="contoh@email.com"
-                />
-                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-300">
-                  <Mail />
-                </div>
-              </div>
-              <p className="text-red-400 text-sm mt-1">
-                {errors.email?.message || ""}
-              </p>
-            </div>
-
-            {/* Password Field */}
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-white font-semibold mb-3"
-              >
-                Password <span className={`${theme.text_title}`}>*</span>
-              </label>
-              <div className="relative">
-                <input
-                  {...register("password")}
-                  type={showPassword ? "text" : "password"}
-                  className={`w-full px-4 py-3 pl-12 pr-12 bg-black/50 border rounded-lg focus:outline-none text-white placeholder-gray-300 transition-all duration-200 ${errors.password?.message
-                      ? "border-red-400"
-                      : `${theme.highlight_focus}`
-                    }`}
-                  placeholder="Masukkan password Anda"
-                />
-                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-300">
-                  <Lock />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-300 hover:text-white transition-colors"
-                >
-                  {showPassword ? <Eye/> : <EyeClosed/>}
-                </button>
-              </div>
-              <p className="text-red-400 text-sm mt-1">
-                {errors.password?.message || ""}
-              </p>
-            </div>
-
-            {/* Remember Me & Forgot Password */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <input
-                  // {...register("rememberMe")}
-                  type="checkbox"
-                  id="rememberMe"
-                  className="h-4 w-4 accent-sky-400 cursor-pointer"
-                />
-                <label
-                  htmlFor="rememberMe"
-                  className={`text-sm cursor-pointer text-white transition-colors`}
-                >
-                  Ingat saya
-                </label>
-              </div>
-              <Link
-                href="/forgot-password"
-                className={`text-white text-sm hover:${theme.text_title} transition-colors underline`}
-              >
-                Lupa password?
-              </Link>
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              // className="w-full bg-yellow-400 hover:bg-yellow-500 cursor-pointer disabled:bg-gray-600 disabled:cursor-not-allowed text-black py-3 px-6 text-lg font-bold rounded-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"
-              className={`w-full ${theme.card_shadow} ${theme.button_pressed_blue} cursor-pointer disabled:bg-gray-600 disabled:cursor-not-allowed py-3 px-6 font-bold rounded-lg  transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl`}
-              >
-              {isSubmitting ? "MASUK..." : "MASUK"}
-            </button>
-
-            {/* Message Display */}
-            {message && (
-              <div
-                className={`p-3 rounded-lg text-center text-sm ${message.includes("Error") || message.includes("gagal")
-                    ? "bg-red-800/20 text-red-600 border border-red-600"
-                    : "bg-green-800/20 text-green-600 border border-green-600"
-                  }`}
-              >
-                {message}
-              </div>
-            )}
-
-            {/* Register Link */}
-            <div className="text-center pt-4 border-t border-gray-700">
-              <p className={`text-white text-sm`}>
-                Belum punya akun?{" "}
-                <Link
-                  href="/oprec/daftar"
-                  className={`hover:${theme.text_title} text-white transition-colors font-semibold underline`}
-                >
-                  Daftar sekarang
-                </Link>
-              </p>
-            </div>
-          </form>
-        </div>
-
-        {/* Additional Info */}
-        <div className="text-center mt-6">
-          <p className={`${theme.text_default} text-xs`}>
-            Dengan masuk, Anda menyetujui{" "}
-            <Link
-              href="/terms"
-              className={`${theme.text_title} hover:text-gray-400 underline`}
-            >
-              Syarat & Ketentuan
-            </Link>{" "}
-            dan{" "}
-            <Link
-              href="/privacy"
-              className={`${theme.text_title} hover:text-gray-400 underline`}
-            >
-              Kebijakan Privasi
-            </Link>
-          </p>
-        </div>
-      </div>
+       <div className="max-w-md w-full relative z-10">
+               <div className="bg-white/70 backdrop-blur-md border border-white/40 rounded-2xl p-8 shadow-[0_8px_32px_0_rgba(11,94,168,0.08)]">
+                 
+                 {/* Login Header */}
+                 <div className="text-center mb-8">
+                   <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight mb-2">
+                     Masuk ke Akun
+                   </h1>
+                   <p className="text-sm text-slate-500 font-medium">
+                     Silakan masuk untuk mengakses dashboard Anda
+                   </p>
+                   <div className="w-12 h-1 bg-[#0B5EA8] rounded-full mx-auto mt-4 opacity-80"></div>
+                 </div>
+       
+                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+                   {/* Email Field */}
+                   <div>
+                     <label
+                       htmlFor="email"
+                       className="block text-sm text-slate-700 font-semibold mb-2"
+                     >
+                       Email <span className="text-red-500">*</span>
+                     </label>
+                     <div className="relative">
+                       <input
+                         {...register("email")}
+                         type="email"
+                         className={`w-full px-4 py-3 pl-11 bg-white/60 border border-slate-200 rounded-xl focus:outline-none focus:border-[#0B5EA8] focus:ring-2 focus:ring-[#0B5EA8]/20 text-slate-800 placeholder-slate-400 transition-all duration-200 ${
+                           errors.email?.message ? "border-red-400 focus:ring-red-100 focus:border-red-400" : ""
+                         }`}
+                         placeholder="contoh@email.com"
+                       />
+                       <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5">
+                         <Mail className="w-full h-full" />
+                       </div>
+                     </div>
+                     <p className="text-red-500 text-xs mt-1.5 font-medium">
+                       {errors.email?.message || ""}
+                     </p>
+                   </div>
+       
+                   {/* Password Field */}
+                   <div>
+                     <label
+                       htmlFor="password"
+                       className="block text-sm text-slate-700 font-semibold mb-2"
+                     >
+                       Password <span className="text-red-500">*</span>
+                     </label>
+                     <div className="relative">
+                       <input
+                         {...register("password")}
+                         type={showPassword ? "text" : "password"}
+                         className={`w-full px-4 py-3 pl-11 pr-11 bg-white/60 border border-slate-200 rounded-xl focus:outline-none focus:border-[#0B5EA8] focus:ring-2 focus:ring-[#0B5EA8]/20 text-slate-800 placeholder-slate-400 transition-all duration-200 ${
+                           errors.password?.message ? "border-red-400 focus:ring-red-100 focus:border-red-400" : ""
+                         }`}
+                         placeholder="Masukkan password Anda"
+                       />
+                       <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5">
+                         <Lock className="w-full h-full" />
+                       </div>
+                       <button
+                         type="button"
+                         onClick={() => setShowPassword(!showPassword)}
+                         className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                       >
+                         {showPassword ? <Eye className="w-5 h-5" /> : <EyeClosed className="w-5 h-5" />}
+                       </button>
+                     </div>
+                     <p className="text-red-500 text-xs mt-1.5 font-medium">
+                       {errors.password?.message || ""}
+                     </p>
+                   </div>
+       
+                   {/* Remember Me & Forgot Password */}
+                   <div className="flex items-center justify-between pt-1">
+                     <div className="flex items-center space-x-2">
+                       <input
+                         type="checkbox"
+                         id="rememberMe"
+                         className="h-4 w-4 rounded border-slate-300 text-[#0B5EA8] focus:ring-[#0B5EA8]/20 accent-[#0B5EA8] cursor-pointer"
+                       />
+                       <label
+                         htmlFor="rememberMe"
+                         className="text-xs font-semibold text-slate-600 cursor-pointer select-none"
+                       >
+                         Ingat saya
+                       </label>
+                     </div>
+                     <Link
+                       href="/forgot-password"
+                       className="text-xs font-bold text-[#0B5EA8] hover:underline transition-all"
+                     >
+                       Lupa password?
+                     </Link>
+                   </div>
+       
+                   {/* Submit Button */}
+                   <button
+                     type="submit"
+                     disabled={isSubmitting}
+                     className="w-full mt-2 bg-[#0B5EA8] hover:bg-[#094d8a] text-white py-3 px-6 font-bold rounded-xl shadow-md shadow-blue-500/10 hover:shadow-lg hover:shadow-blue-500/20 disabled:bg-slate-400 disabled:cursor-not-allowed transform hover:scale-[1.01] active:scale-[0.99] transition-all duration-200 text-sm tracking-wide"
+                   >
+                     {isSubmitting ? "MEMPROSES..." : "MASUK"}
+                   </button>
+       
+                   {/* Message Display */}
+                   {message && (
+                     <div
+                       className={`p-3 rounded-xl text-center text-xs font-semibold ${
+                         message.includes("Error") || message.includes("gagal")
+                           ? "bg-red-50 text-red-600 border border-red-200"
+                           : "bg-green-50 text-green-600 border border-green-200"
+                       }`}
+                     >
+                       {message}
+                     </div>
+                   )}
+       
+                   {/* Register Link */}
+                   <div className="text-center pt-5 border-t border-slate-100 mt-4">
+                     <p className="text-xs text-slate-500 font-medium">
+                       Belum punya akun?{" "}
+                       <Link
+                         href="/oprec/daftar"
+                         className="text-[#0B5EA8] hover:underline font-bold"
+                       >
+                         Daftar sekarang
+                       </Link>
+                     </p>
+                   </div>
+                 </form>
+               </div>
+       
+               {/* Additional Info */}
+               <div className="text-center mt-6">
+                 <p className="text-slate-400 text-[11px] font-medium">
+                   Dengan masuk, Anda menyetujui{" "}
+                   <Link href="/terms" className="text-slate-500 hover:text-[#0B5EA8] underline">
+                     Syarat & Ketentuan
+                   </Link>{" "}
+                   dan{" "}
+                   <Link href="/privacy" className="text-slate-500 hover:text-[#0B5EA8] underline">
+                     Kebijakan Privasi
+                   </Link>
+                 </p>
+               </div>
+             </div>
     </div>
   );
 };

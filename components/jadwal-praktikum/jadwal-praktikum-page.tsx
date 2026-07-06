@@ -330,24 +330,24 @@ const JadwalPraktikumPage = ({ dataClasses }: JadwalPraktikumPageProps) => {
             </div>
           </div>
 
-          <div className={`${theme.card_small_green}`}>
+          <div className={`${theme.card_small_blue}`}>
             <div className="flex items-center gap-3">
-              <Users className="h-6 w-6 text-green-400" />
+              <Users className={`h-6 w-6 ${theme.text_title}`} />
               <div>
-                <p className="text-green-400 text-sm">Total Asdos</p>
-                <p className="text-2xl font-bold text-green-500">
+                <p className={`${theme.text_title} text-sm`}>Total Asdos</p>
+                <p className={`text-2xl font-bold ${theme.text_title}`}>
                   {stats.totalAsdos}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className={`${theme.card_small_purple}`}>
+          <div className={`${theme.card_small_blue}`}>
             <div className="flex items-center gap-3">
-              <GraduationCap className="h-6 w-6 text-purple-400" />
+              <GraduationCap className={`h-6 w-6 ${theme.text_title}`} />
               <div>
-                <p className="text-purple-400 text-sm">Total Dosen</p>
-                <p className="text-2xl font-bold text-purple-500">
+                <p className={`${theme.text_title} text-sm`}>Total Dosen</p>
+                <p className={`text-2xl font-bold ${theme.text_title}`}>
                   {stats.totalDosen}
                 </p>
               </div>
