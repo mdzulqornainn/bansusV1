@@ -3,6 +3,7 @@
 import { FormDataAddAsdos, FormDataUpdatePendaftar } from "@/lib/interfaces";
 import { prisma } from "@/lib/prisma";
 import { updateTag } from "next/cache";
+import  { createFolderForAsdos } from "@/lib/drives";
 
 // ------------------------ CREATE FUNCTION ------------------------
 
@@ -25,7 +26,8 @@ export const addAsdosClass = async (
 
 export const addAsdos = async (data: FormDataAddAsdos) => {
   try {
-    await prisma.asdos.create({
+    // 1. Simpan data asdos ke database
+    const newAsdos = await prisma.asdos.create({
       data: {
         npm: data.npm,
         userId: data.userId,
@@ -35,20 +37,46 @@ export const addAsdos = async (data: FormDataAddAsdos) => {
         alasan: data.alasan,
       },
     });
+
+    // 2. Update role user
     await prisma.user.update({
       where: { id: data.userId },
       data: { role: "ASDOS" },
     });
+
+    // 3. Hapus data aplikasi yang sudah diproses
     await prisma.asdosApplication.delete({ where: { npm: data.npm } });
+
+    // 4. OTOMATISASI: Buat folder Google Drive
+    try {
+      const user = await prisma.user.findUnique({ where: { id: data.userId } });
+      const folderName = user?.name || data.npm;
+
+      // Memanggil fungsi dari lib/drives.ts
+      const folderRes = await createFolderForAsdos(folderName);
+
+      if (folderRes.data?.id) {
+        // Update database dengan driveFolderId yang baru dibuat
+        await prisma.asdos.update({
+          where: { npm: data.npm },
+          data: { driveFolderId: folderRes.data.id },
+        });
+      }
+    } catch (driveError) {
+      // Kita bungkus di try-catch agar jika Google Drive gagal, 
+      // pendaftaran asdos di database tetap berhasil
+      console.error("Gagal membuat folder Google Drive:", driveError);
+    }
+
+    // 5. Update Cache
     updateTag("user");
     updateTag(`user-${data.userId}`);
     updateTag("asdos");
     updateTag(`asdos-${data.npm}`);
-    updateTag("asdos-application");
-    updateTag(`asdos-application-${data.npm}`);
-    return { success: "Data berhasil disimpan" };
+    
+    return { success: "Data berhasil disimpan dan folder telah dibuat!" };
   } catch (e) {
-    return { error: "Data gagal disimpan, coba dengan data yang berbeda" + e };
+    return { error: "Data gagal disimpan, coba dengan data yang berbeda. " + e };
   }
 };
 

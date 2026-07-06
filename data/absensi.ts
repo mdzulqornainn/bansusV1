@@ -34,15 +34,31 @@ export const submitAbsensi = async (
   buktiKehadiran: File | null
 ) => {
   try {
-    const fileName = `${npm}_${name.split(" ").join("_").toLowerCase()}_${matkul}_pertmuan_${pertemuanKe}.pdf`;
-    const folderId = process.env.GOOGLE_DRIVE_FOLDER_ABSENSI_ASDOS;
-
-    if (!folderId) {
-      return { error: "Folder bukti kehadiran tidak ditemukan" };
-    }
     if (!buktiKehadiran) {
       return { error: "File bukti kehadiran tidak ditemukan" };
     }
+
+    // 1. Cari data Asdos di database untuk mendapatkan ID Folder spesifik mereka
+    const asdos = await prisma.asdos.findUnique({
+      where: { npm: npm },
+      select: { driveFolderId: true }
+    });
+
+    // 2. Gunakan folder khusus Asdos, jika belum digenerate (null), fallback ke folder utama
+    const folderId = asdos?.driveFolderId || process.env.GOOGLE_DRIVE_FOLDER_ABSENSI_ASDOS;
+
+    if (!folderId) {
+      return { error: "Konfigurasi folder Google Drive tidak ditemukan" };
+    }
+
+    // 3. Ekstrak ekstensi asli file (jpg/png) dari input Front-End
+    const fileExt = buktiKehadiran.name.split('.').pop() || 'png';
+    const safeName = name.split(" ").join("_").toLowerCase();
+    const safeMatkul = matkul.split(" ").join("_");
+    
+    const fileName = `${npm}_${safeName}_${safeMatkul}_pertemuan_${pertemuanKe}.${fileExt}`;
+
+    // Cek status pertemuan aktif via cache
     const getActiveAbsensiCached = unstable_cache(
       async () => getActiveAbsensi(),
       [],
@@ -63,15 +79,24 @@ export const submitAbsensi = async (
     if (!dataAbsensi?.pertemuanActive.includes(pertemuanKe)) {
       return { error: "Pertemuan ini tidak dapat diisi" };
     }
+
+    // Eksekusi upload ke Google Drive
     const responseUpload = await uploadFileToDrive(
       buktiKehadiran,
       fileName,
       folderId,
       true
     );
+
+    // Tangkap jika terjadi error dari Google Drive
+    if (responseUpload.error || !responseUpload.data?.id) {
+      return { error: responseUpload.error || "Gagal mengunggah file ke Google Drive" };
+    }
+
+    // Simpan ke database
     const data = await prisma.absensi.create({
       data: {
-        fileId: responseUpload?.data?.id || "",
+        fileId: responseUpload.data.id,
         classAsdosId,
         pertemuanKe,
         waktuKehadiran: waktuKehadiran || new Date(),
@@ -80,13 +105,15 @@ export const submitAbsensi = async (
       },
     });
 
+    // Invalidate cache agar UI langsung ter-update
     updateTag("absensi");
     updateTag("asdos-absensi");
     updateTag(`asdos-${npm}`);
     updateTag(`asdos-${userId}`);
+    
     return { data, success: "Data berhasil disimpan" };
   } catch (error) {
-    console.error("Error creating active absensi:", error);
+    console.error("Error submitting absensi:", error);
     return { error: "Data gagal disimpan, coba dengan data yang berbeda" };
   }
 };
