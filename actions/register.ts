@@ -16,92 +16,71 @@ export async function signUpAsdos(data: TSignUpAsdosSchema) {
     return { error: "Mohon isi form dengan benar!" };
   }
 
-  const {
-    name,
-    email,
-    password,
-    confirmPassword,
-    npm,
-    whatsapp,
-    domisili,
-    matkul1,
-    matkul2,
-    wawancara,
-    alasanOnline,
-    alasan,
-    bersediaDuaMatkul,
-    pengalamanAsdos,
-    bersediaDitempatkanLain,
-    suratPernyataan,
-  } = data;
+  // 1. Cek Periode Pendaftaran Aktif
+  const now = new Date();
+  const activePeriod = await prisma.oprecSettings.findFirst({
+    where: {
+      openAt: { lte: now },
+      OR: [
+        { closeAt: { gte: now } },
+        { extendedAt: { gte: now } }
+      ]
+    }
+  });
 
-  if (!suratPernyataan) {
-    return { error: "File surat pernyataan tidak ditemukan." };
+  if (!activePeriod) {
+    return { error: "Pendaftaran sedang ditutup atau periode belum dimulai." };
   }
 
+  const {
+    name, email, password, confirmPassword, npm, whatsapp, domisili,
+    matkul1, matkul2, wawancara, alasanOnline, alasan,
+    bersediaDuaMatkul, pengalamanAsdos, bersediaDitempatkanLain, suratPernyataan,
+  } = data;
+
+  if (!suratPernyataan) return { error: "File surat pernyataan tidak ditemukan." };
+
   if (!npm.startsWith("23") && wawancara === "online") {
-    return {
-      error:
-        "Wawancara online hanya untuk mahasiswa angkatan 2023!, silahkan isi wawancara offline",
-    };
+    return { error: "Wawancara online hanya untuk angkatan 2023!" };
   }
 
   if (password !== confirmPassword) {
-    return { error: "Password tidak sama, silahkan coba lagi!" };
+    return { error: "Password tidak sama!" };
   }
 
   try {
+    // Cek email user (Global - tetap perlu karena User table bersifat global)
     const emailExists = await getUserByEmail(email);
-    if (emailExists) {
-      return { error: "Email sudah terdaftar" };
-    }
+    if (emailExists) return { error: "Email sudah terdaftar" };
 
-    const aplicantExists = await prisma.asdosApplication.findFirst({
-      where: { npm },
-    });
-
-    if (aplicantExists) {
-      return { error: "NPM sudah terdaftar" };
-    }
+    // --- HAPUS CEK NPM GLOBAL ---
+    // Jangan cek npm secara global karena mahasiswa boleh daftar di periode berikutnya.
+    // Pengecekan duplikat akan dilakukan oleh Prisma di langkah "create" (P2002).
 
     const hashedPassword = await bcryptjs.hash(password, 10);
 
     const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        role: "CALON_ASDOS",
-      },
+      data: { name, email, password: hashedPassword, role: "CALON_ASDOS" },
     });
 
-    if (!user) {
-      return { error: "Gagal membuat akun" };
-    }
-
+    // Upload File
     const fileName = `${npm}_${name.split(" ").join("_").toLowerCase()}.pdf`;
     const folderId = process.env.GOOGLE_DRIVE_FOLDER_SURAT_PERNYATAAN_ID;
+    if (!folderId) return { error: "Folder penyimpanan tidak ditemukan" };
 
-    if (!folderId) {
-      return { error: "Folder surat pernyataan tidak ditemukan" };
-    }
-
-    const responseUpload = await uploadFileToDrive(
-      suratPernyataan,
-      fileName,
-      folderId
-    );
-
+    const responseUpload = await uploadFileToDrive(suratPernyataan, fileName, folderId);
     if (responseUpload.error || !responseUpload.data?.id) {
       await prisma.user.delete({ where: { id: user.id } });
       return { error: "Gagal upload file" };
     }
 
+    // 2. Buat Pendaftaran dengan Period ID
     const application = await prisma.asdosApplication.create({
       data: {
         fileId: responseUpload.data.id,
         userId: user.id,
         npm,
+        email, // Wajib diisi karena constraint unik
         whatsapp,
         domisili,
         wawancara,
@@ -110,40 +89,29 @@ export async function signUpAsdos(data: TSignUpAsdosSchema) {
         bersediaDuaMatkul,
         pengalamanAsdos,
         bersediaDitempatkanLain,
+        oprecSettingsId: activePeriod.id, // ID Periode Aktif
       },
     });
 
-    if (!application) {
-      await prisma.user.delete({ where: { id: user.id } });
-      return { error: "Gagal membuat pendaftaran" };
-    }
-
-    await prisma.courseApplication.create({
-      data: {
-        asdosApplicationId: application.id,
-        courseId: matkul1,
-      },
-    });
-
-    await prisma.courseApplication.create({
-      data: {
-        asdosApplicationId: application.id,
-        courseId: matkul2,
-      },
+    // ... (Course Application tetap sama)
+    await prisma.courseApplication.createMany({
+      data: [
+        { asdosApplicationId: application.id, courseId: matkul1 },
+        { asdosApplicationId: application.id, courseId: matkul2 }
+      ]
     });
 
     const verificationToken = await generateVerificationToken(email);
-    await sendVerificationEmail(
-      verificationToken.email,
-      verificationToken.token
-    );
+    await sendVerificationEmail(verificationToken.email, verificationToken.token);
 
-    return {
-      success:
-        "Berhasil daftar!, jika ingin login ke aplikasi silahkan verifikasi email anda terlebih dahulu.",
-      role: "CALON_ASDOS",
-    };
-  } catch (error) {
+    return { success: "Berhasil daftar! Silakan verifikasi email Anda." };
+
+  } catch (error: any) {
+    // 3. Handle Constraint Unik (P2002)
+    if (error.code === 'P2002') {
+      return { error: "Anda sudah mendaftar untuk periode ini." };
+    }
+    
     const errorMessage = error instanceof Error ? error.message : String(error);
     return { error: errorMessage };
   }

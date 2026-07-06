@@ -15,7 +15,7 @@ export const currentUser = unstable_cache(
         email: true,
         asdos: true,
         dosen: true,
-        asdosApplicant: true,
+        asdosApplicants: true,
         createdAt: true,
         updatedAt: true,
       },

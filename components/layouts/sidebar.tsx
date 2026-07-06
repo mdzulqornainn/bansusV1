@@ -321,6 +321,7 @@ const Sidebar = ({ user }: SidebarProps) => {
       { icon: UserCog, label: "Dosen", link: "/admin/dosen" },
       { icon: UserIcon, label: "Users", link: "/admin/users" },
       { icon: FileText, label: "Pendaftar", link: "/admin/pendaftar" },
+      { icon: Calendar, label: "Oprec Controller", link: "/admin/oprec-control" },
     ];
     return (
       <>
