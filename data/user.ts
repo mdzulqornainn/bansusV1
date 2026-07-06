@@ -46,11 +46,14 @@ export const updateAsdosApplicationToGuest = async (
       data: { role: "GUEST" },
     });
 
-    if (user.role === "GUEST")
-      await prisma.asdosApplication.delete({ where: { npm } });
+    if (user.role === "GUEST") {
+      await prisma.asdosApplication.deleteMany({ where: { npm } });
+    }
+
     revalidatePath("/admin/users");
     return { success: "Data berhasil dihapus" };
-  } catch {
+  } catch (error) {
+    console.error("Error updating user to GUEST:", error);
     return { error: "Data gagal dihapus" };
   }
 };
