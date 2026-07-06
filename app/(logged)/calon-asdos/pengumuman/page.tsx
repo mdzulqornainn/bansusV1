@@ -7,17 +7,17 @@ export default async function Page() {
   const user = await currentUserCached();
   const getAsdosApplicationCached = unstable_cache(
     async (npm: string) => getAsdosApplication(npm),
-    [user?.asdosApplicant?.npm ?? ""],
+    [user?.asdosApplicants?.[0].npm ?? ""],
     {
       tags: [
         "global-cache",
-        `asdos-application-${user?.asdosApplicant?.npm ?? ""}`,
+        `asdos-application-${user?.asdosApplicants?.[0].npm ?? ""}`,
       ],
       revalidate: false,
     }
   );
   const dataAsdosApplication = await getAsdosApplicationCached(
-    user?.asdosApplicant?.npm ?? ""
+    user?.asdosApplicants?.[0].npm ?? ""
   );
   return (
     <PengumumanCalonAsdosPage

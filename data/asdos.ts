@@ -45,7 +45,7 @@ export const addAsdos = async (data: FormDataAddAsdos) => {
     });
 
     // 3. Hapus data aplikasi yang sudah diproses
-    await prisma.asdosApplication.delete({ where: { npm: data.npm } });
+    await prisma.asdosApplication.deleteMany({ where: { npm: data.npm } });
 
     // 4. OTOMATISASI: Buat folder Google Drive
     try {
