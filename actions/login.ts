@@ -38,18 +38,18 @@ export const login = async (data: TSignInSchema) => {
     await signIn("credentials", {
       email,
       password,
-      redirectTo: DEFAULT_LOGIN_REDIRECT,
+      redirect: false,
     });
-    return;
+    return { success: "Login berhasil!"};
   } catch (e) {
     if (e instanceof AuthError) {
       switch (e.type) {
         case "CredentialsSignin":
           return { error: "Akun tidak terdaftar!" };
         default:
-          return { error: "Something went wrong" };
+          return { error: "Terjadi Kesalahan Saat Login" };
       }
     }
-    throw e;
+    return { error: "Terjadi Kesalahan Saat Login" };
   }
 };

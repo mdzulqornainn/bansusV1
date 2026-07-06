@@ -107,3 +107,47 @@ export const uploadFileToDrive = async (
     };
   }
 };
+
+// fungsi untuk membuat folder baru di Google Drive per nama asdos
+export const createFolderForAsdos = async (
+  folderName: string,
+  parentFolderId?: string
+) => {
+  try {
+    const drive = await getDriveService();
+
+    // Jika parentFolderId tidak dikirim, gunakan folder utama dari .env
+    const targetParentId = parentFolderId || process.env.GOOGLE_DRIVE_FOLDER_ABSENSI_ASDOS;
+
+    const fileMetadata = {
+      name: `Absensi - ${folderName}`,
+      mimeType: "application/vnd.google-apps.folder",
+      parents: targetParentId ? [targetParentId] : undefined,
+    };
+
+    const response = await drive.files.create({
+      requestBody: fileMetadata,
+      fields: "id",
+    });
+
+    if (!response.data?.id) {
+      return { error: "Gagal membuat folder di Google Drive." };
+    }
+
+    // Jika ingin folder ini bisa dilihat oleh siapa saja yang memiliki link
+    await drive.permissions.create({
+      fileId: response.data.id,
+      requestBody: {
+        role: "reader",
+        type: "anyone",
+      },
+    });
+
+    return { data: { id: response.data.id }, success: "Folder berhasil dibuat!" };
+  } catch (e) {
+    console.error("Error membuat folder di Google Drive:", e);
+    return {
+      error: `Gagal membuat folder: ${e instanceof Error ? e.message : "Kesalahan tidak diketahui."}`,
+    };
+  }
+};

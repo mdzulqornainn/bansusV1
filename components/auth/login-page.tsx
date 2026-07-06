@@ -9,10 +9,13 @@ import { Eye, EyeClosed, Lock, Mail } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation"; // 1. TAMBAHKAN IMPORT INI
 
 const LoginPage = () => {
+  const router = useRouter(); // 2. Ini sudah benar
   const [message, setMessage] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  
   const {
     register,
     handleSubmit,
@@ -20,42 +23,29 @@ const LoginPage = () => {
     reset,
   } = useForm<TSignInSchema>({
     resolver: zodResolver(signInSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-      // rememberMe: false,
-    },
+    defaultValues: { email: "", password: "" },
   });
 
   const onSubmit = async (data: TSignInSchema) => {
     setMessage("");
 
-    const validateField = signInSchema.safeParse(data);
-    if (!validateField.success) {
-      setMessage("Mohon isi form dengan benar!");
-      return;
-    }
-
     try {
-      await login(data).then((data) => {
-        if (data?.success) {
-          setMessage(data.success || "Login berhasil!");
-          reset();
-        } else {
-          setMessage(
-            `Error: ${data?.error || "Terjadi kesalahan saat login."}`
-          );
-          console.error("Server Action Error:", data?.error);
-        }
-      });
+      // 3. Panggil Server Action
+      const result = await login(data);
+      
+      if (result?.success) {
+        setMessage("Login berhasil! Mengalihkan...");
+        reset();
+        
+        // 4. Redirect ke dashboard setelah sukses
+        router.push("/dashboard"); 
+        router.refresh();
+      } else {
+        setMessage(`Error: ${result?.error || "Terjadi kesalahan saat login."}`);
+        console.error("Server Action Error:", result?.error);
+      }
     } catch (e) {
-      setMessage(
-        `Terjadi kesalahan jaringan atau server: ${e || "Kesalahan tidak diketahui."}`
-      );
-    } finally {
-      setTimeout(() => {
-        setMessage("");
-      }, 5000);
+      setMessage("Terjadi kesalahan jaringan atau server.");
     }
   };
 
