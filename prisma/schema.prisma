@@ -45,6 +45,8 @@ model Asdos {
   user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   classAsdos      ClassAsdos[]
 
+  driveFolderId String?
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

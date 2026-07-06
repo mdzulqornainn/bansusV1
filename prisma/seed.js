@@ -335,6 +335,13 @@ async function main() {
 
   const users = [
     {
+      name: "Admin",
+      email: "badankhusus26@gmail.com",
+      password: passwordHash,
+      role: "ADMIN",
+      emailVerified: new Date(),
+    },
+    {
       name: "Dr. Budi Santoso",
       email: "budi.santoso@university.ac.id",
       password: passwordHash,
