@@ -16,6 +16,7 @@ import {
   CheckCircle2
 } from "lucide-react";
 
+import { HeroSection } from "@/components/oprec/hero";
 import { RequirementsSection } from "@/components/oprec/requirement";
 import { MatkulSection } from "@/components/oprec/subject";
 import { TimelineSection } from "@/components/oprec/timeline";

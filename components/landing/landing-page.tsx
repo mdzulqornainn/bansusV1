@@ -53,10 +53,10 @@ const LabkomLanding = () => {
             </span>
           </div>
       
-          <h1 className={`text-5xl md:text-7xl font-bold ${theme.text_fmipa} mb-8 leading-tight`}>
-            Web Labkom <br></br> Praktikum
+          <h1 className="text-5xl md:text-7xl font-extrabold text-slate-800 tracking-tight mb-6 leading-[1.15]">
+            Web Labkom <br></br> <span className="bg-gradient-to-r from-[#0B5EA8] to-cyan-600 bg-clip-text text-transparent">Praktikum</span>
           </h1>
-          <p className="text-xl text-slate-600 mb-12 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg md:text-xl text-slate-500 mb-14 max-w-2xl mx-auto leading-relaxed font-medium">
             Platform terintegrasi untuk pengelolaan praktikum Jurusan Ilmu
             Komputer. Jadwal, dataset research, dan layanan laboratorium dalam
             satu sistem.

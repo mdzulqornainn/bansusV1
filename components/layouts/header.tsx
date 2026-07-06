@@ -90,7 +90,7 @@ const Header = () => {
   const dropdownItems = [
     { href: "/bansus", label: "Profil Badan Khusus" },
     { href: "/oprec", label: "Open Recruitment Asdos" },
-    { href: "/peer", label: "Peer Group" },
+    { href: "/peer", label: "Hincar TIK" },
     { href: "/fosi", label: "Forum Silaturahmi" },
     { href: "/pad", label: "Pelatihan Asdos" },
   ];
