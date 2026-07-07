@@ -15,6 +15,7 @@ export default async function Page() {
           prodi: true,
         },
       },
+      courseApplication: true,
     },
   });
 
@@ -23,8 +24,7 @@ export default async function Page() {
   let currentUser = null;
 
   if (session?.user?.email) {
-    // Ambil data profil dasar dari database berdasarkan email di sesi
-    currentUser = await prisma.user.findUnique({
+    const dbUser = await prisma.user.findUnique({
       where: { email: session.user.email },
       select: {
         id: true,
@@ -32,6 +32,15 @@ export default async function Page() {
         email: true,
       },
     });
+
+    // 💡 SOLUSI: Map data secara eksplisit agar tipenya menjadi strict string
+    if (dbUser) {
+      currentUser = {
+        id: dbUser.id,
+        name: dbUser.name ?? "", // Mengubah string | null menjadi string
+        email: dbUser.email ?? "", // Mengubah string | null menjadi string
+      };
+    }
   }
 
   return (
