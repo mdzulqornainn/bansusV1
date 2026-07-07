@@ -31,9 +31,18 @@ export async function addAsdos(data: FormDataAddAsdos) {
   try {
     let driveFolderId = null;
 
-    // 1. Buat folder di Google Drive menggunakan Nama Lengkap
+    // 💡 SOLUSI: Ambil nama lengkap user dari database berdasarkan userId
+    const targetUser = await prisma.user.findUnique({
+      where: { id: data.userId },
+      select: { name: true },
+    });
+
+    // Gunakan nama user dari DB, atau fallback ke format NPM jika tidak ditemukan
+    const folderName = targetUser?.name || `Asdos_${data.npm}`;
+
+    // 1. Buat folder di Google Drive menggunakan nama yang valid
     try {
-      const folderRes = await createFolderForAsdos(data.name);
+      const folderRes = await createFolderForAsdos(folderName);
       if (folderRes.data?.id) {
         driveFolderId = folderRes.data.id;
       }
@@ -48,7 +57,6 @@ export async function addAsdos(data: FormDataAddAsdos) {
       });
 
       if (!existingAsdos) {
-        // Jika asdos baru, lakukan operasi create
         await tx.asdos.create({
           data: {
             npm: data.npm,
@@ -61,7 +69,6 @@ export async function addAsdos(data: FormDataAddAsdos) {
           },
         });
       } else {
-        // Jika asdos lama mendaftar ulang, lakukan update data berkas terbaru
         await tx.asdos.update({
           where: { npm: data.npm },
           data: {
@@ -75,19 +82,16 @@ export async function addAsdos(data: FormDataAddAsdos) {
         });
       }
 
-      // Update role user menjadi ASDOS
       await tx.user.update({
         where: { id: data.userId },
         data: { role: "ASDOS" },
       });
 
-      // Hapus data lamaran pendaftaran yang sudah selesai diproses
       await tx.asdosApplication.deleteMany({
         where: { npm: data.npm },
       });
     });
 
-    // 3. Sinkronisasi Cache
     safeRevalidateTag("user");
     safeRevalidateTag(`user-${data.userId}`);
     safeRevalidateTag("asdos");
