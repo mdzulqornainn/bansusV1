@@ -8,7 +8,7 @@ async function getGoogleAuth() {
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID!,
     process.env.GOOGLE_CLIENT_SECRET!,
-    process.env.GOOGLE_REDIRECT_URI!
+    process.env.GOOGLE_REDIRECT_URI!,
   );
 
   const { token } = await prisma.googleRefreshToken.findFirstOrThrow();
@@ -44,7 +44,7 @@ export const uploadFileToDrive = async (
   file: File,
   fileName: string,
   parentsId?: string,
-  isPublic?: boolean
+  isPublic?: boolean,
 ) => {
   if (!file) {
     return { error: "File surat pernyataan tidak ditemukan." };
@@ -111,13 +111,14 @@ export const uploadFileToDrive = async (
 // fungsi untuk membuat folder baru di Google Drive per nama asdos
 export const createFolderForAsdos = async (
   folderName: string,
-  parentFolderId?: string
+  parentFolderId?: string,
 ) => {
   try {
     const drive = await getDriveService();
 
     // Jika parentFolderId tidak dikirim, gunakan folder utama dari .env
-    const targetParentId = parentFolderId || process.env.GOOGLE_DRIVE_FOLDER_ABSENSI_ASDOS;
+    const targetParentId =
+      parentFolderId || process.env.GOOGLE_DRIVE_FOLDER_ABSENSI_ASDOS;
 
     const fileMetadata = {
       name: `Absensi - ${folderName}`,
@@ -143,7 +144,10 @@ export const createFolderForAsdos = async (
       },
     });
 
-    return { data: { id: response.data.id }, success: "Folder berhasil dibuat!" };
+    return {
+      data: { id: response.data.id },
+      success: "Folder berhasil dibuat!",
+    };
   } catch (e) {
     console.error("Error membuat folder di Google Drive:", e);
     return {

@@ -55,18 +55,22 @@ const Info = ({
 const DetailPendaftarPage = ({
   dataAsdosApplication,
 }: DetailPendaftarPageProps) => {
+  // 💡 PERBAIKAN 1: Menyertakan properti name ke dalam payload dataAccept
   const formDataAccept = {
     npm: dataAsdosApplication?.npm || "",
     userId: dataAsdosApplication?.userId || "",
+    name: dataAsdosApplication?.user?.name || "",
     fileId: dataAsdosApplication?.fileId || "",
     whatsapp: dataAsdosApplication?.whatsapp || "",
     domisili: dataAsdosApplication?.domisili || "",
     alasan: dataAsdosApplication?.alasan || "",
   };
+
   const formDataReject = {
     npm: dataAsdosApplication?.npm || "",
     userId: dataAsdosApplication?.userId || "",
   };
+
   const [modalOpenAccept, setModalOpenAccept] = useState<boolean>(false);
   const [modalOpenReject, setModalOpenReject] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -110,7 +114,8 @@ const DetailPendaftarPage = ({
       })
       .finally(() => {
         setLoading(false);
-        setModalOpenAccept(false);
+        // 💡 PERBAIKAN 2: Mengubah setModalOpenAccept menjadi setModalOpenReject
+        setModalOpenReject(false);
         setTimeout(() => {
           setError("");
         }, 5000);
@@ -279,7 +284,9 @@ const DetailPendaftarPage = ({
                     >
                       Lihat Dokumen <ExternalLink className="w-4 h-4 ml-1" />
                     </Link>
-                    <span className={`mx-1 ${theme.text_default_light}`}>atau</span>
+                    <span className={`mx-1 ${theme.text_default_light}`}>
+                      atau
+                    </span>
                     <Link
                       href={
                         dataAsdosApplication?.suratPernyataan.linkDownload ?? ""
@@ -301,7 +308,7 @@ const DetailPendaftarPage = ({
                     </dt>
                     <dd className={`mt-1 text-sm ${theme.text_default}`}>
                       {new Date(
-                        dataAsdosApplication?.createdAt ?? new Date()
+                        dataAsdosApplication?.createdAt ?? new Date(),
                       ).toLocaleDateString("id-ID", {
                         weekday: "long",
                         year: "numeric",
@@ -320,7 +327,7 @@ const DetailPendaftarPage = ({
                       {new Date(
                         dataAsdosApplication?.updatedAt ??
                           dataAsdosApplication?.createdAt ??
-                          new Date()
+                          new Date(),
                       ).toLocaleDateString("id-ID", {
                         weekday: "long",
                         year: "numeric",

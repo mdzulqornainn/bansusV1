@@ -8,7 +8,11 @@ import { signInSchema } from "@/lib/zod";
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 import { AuthError } from "next-auth";
 
-export const login = async (data: TSignInSchema) => {
+// 💡 Tambahkan parameter 'callbackUrl' (opsional) pada signature fungsi
+export const login = async (
+  data: TSignInSchema,
+  callbackUrl?: string | null,
+) => {
   const validatedFields = signInSchema.safeParse(data);
 
   if (!validatedFields.success) {
@@ -38,9 +42,14 @@ export const login = async (data: TSignInSchema) => {
     await signIn("credentials", {
       email,
       password,
-      redirect: false,
+      redirect: false, // Tetap false agar tidak memicu error redirect bawaan Next-Auth di dalam try-catch
     });
-    return { success: "Login berhasil!"};
+
+    // 💡 Kembalikan alamat redirectTo agar dibaca oleh Client Component
+    return {
+      success: "Login berhasil!",
+      redirectTo: callbackUrl || DEFAULT_LOGIN_REDIRECT,
+    };
   } catch (e) {
     if (e instanceof AuthError) {
       switch (e.type) {

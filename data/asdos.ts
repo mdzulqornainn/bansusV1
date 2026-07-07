@@ -2,22 +2,22 @@
 
 import { FormDataAddAsdos, FormDataUpdatePendaftar } from "@/lib/interfaces";
 import { prisma } from "@/lib/prisma";
-import { updateTag } from "next/cache";
-import  { createFolderForAsdos } from "@/lib/drives";
+import { revalidateTag } from "next/cache";
+import { createFolderForAsdos } from "@/lib/drives";
 
 // ------------------------ CREATE FUNCTION ------------------------
 
 export const addAsdosClass = async (
   npm: string,
   classId: string,
-  userId: string
+  userId: string,
 ) => {
   try {
     await prisma.classAsdos.create({ data: { asdosNpm: npm, classId } });
-    updateTag("class");
-    updateTag("asdos");
-    updateTag(`asdos-${npm}`);
-    updateTag(`asdos-${userId}`);
+    revalidateTag("class");
+    revalidateTag("asdos");
+    revalidateTag(`asdos-${npm}`);
+    revalidateTag(`asdos-${userId}`);
     return { success: "Data berhasil disimpan" };
   } catch {
     return { error: "Data gagal disimpan, coba dengan data yang berbeda" };
@@ -26,57 +26,57 @@ export const addAsdosClass = async (
 
 export const addAsdos = async (data: FormDataAddAsdos) => {
   try {
-    // 1. Simpan data asdos ke database
-    const newAsdos = await prisma.asdos.create({
-      data: {
-        npm: data.npm,
-        userId: data.userId,
-        fileId: data.fileId,
-        whatsapp: data.whatsapp,
-        domisili: data.domisili,
-        alasan: data.alasan,
-      },
-    });
+    let driveFolderId = null;
 
-    // 2. Update role user
-    await prisma.user.update({
-      where: { id: data.userId },
-      data: { role: "ASDOS" },
-    });
-
-    // 3. Hapus data aplikasi yang sudah diproses
-    await prisma.asdosApplication.deleteMany({ where: { npm: data.npm } });
-
-    // 4. OTOMATISASI: Buat folder Google Drive
+    // 1. Buat folder di Google Drive menggunakan Nama Lengkap
     try {
-      const user = await prisma.user.findUnique({ where: { id: data.userId } });
-      const folderName = user?.name || data.npm;
-
-      // Memanggil fungsi dari lib/drives.ts
-      const folderRes = await createFolderForAsdos(folderName);
-
+      const folderRes = await createFolderForAsdos(data.name);
       if (folderRes.data?.id) {
-        // Update database dengan driveFolderId yang baru dibuat
-        await prisma.asdos.update({
-          where: { npm: data.npm },
-          data: { driveFolderId: folderRes.data.id },
-        });
+        driveFolderId = folderRes.data.id;
       }
     } catch (driveError) {
-      // Kita bungkus di try-catch agar jika Google Drive gagal, 
-      // pendaftaran asdos di database tetap berhasil
       console.error("Gagal membuat folder Google Drive:", driveError);
     }
 
-    // 5. Update Cache
-    updateTag("user");
-    updateTag(`user-${data.userId}`);
-    updateTag("asdos");
-    updateTag(`asdos-${data.npm}`);
-    
+    // 2. Jalankan seluruh operasi Database dalam satu transaksi (Optimasi Vercel)
+    await prisma.$transaction([
+      // Simpan data asdos baru beserta ID folder Drive-nya
+      prisma.asdos.create({
+        data: {
+          npm: data.npm,
+          userId: data.userId,
+          fileId: data.fileId,
+          whatsapp: data.whatsapp,
+          domisili: data.domisili,
+          alasan: data.alasan,
+          driveFolderId: driveFolderId,
+        },
+      }),
+
+      // Update role user menjadi ASDOS
+      prisma.user.update({
+        where: { id: data.userId },
+        data: { role: "ASDOS" },
+      }),
+
+      // Hapus data lamaran pendaftaran yang sudah selesai diproses
+      prisma.asdosApplication.deleteMany({
+        where: { npm: data.npm },
+      }),
+    ]);
+
+    // 3. Perbarui Cache Next.js agar UI langsung sinkron dan tidak berstatus null
+    revalidateTag("user");
+    revalidateTag(`user-${data.userId}`);
+    revalidateTag("asdos");
+    revalidateTag(`asdos-${data.npm}`);
+
     return { success: "Data berhasil disimpan dan folder telah dibuat!" };
   } catch (e) {
-    return { error: "Data gagal disimpan, coba dengan data yang berbeda. " + e };
+    console.error("CRITICAL ERROR pada addAsdos:", e);
+    return {
+      error: "Data gagal disimpan. " + (e instanceof Error ? e.message : e),
+    };
   }
 };
 
@@ -144,10 +144,10 @@ export const getAsdos = async (npm: string) => {
             },
             absensi: {
               include: {
-                buktiKehadiran: true, // Include file data for attendance proof
+                buktiKehadiran: true,
               },
               orderBy: {
-                pertemuanKe: "asc", // Order by meeting number
+                pertemuanKe: "asc",
               },
             },
           },
@@ -185,10 +185,10 @@ export const getAsdosByUserId = async (userId: string) => {
             },
             absensi: {
               include: {
-                buktiKehadiran: true, // Include file data for attendance proof
+                buktiKehadiran: true,
               },
               orderBy: {
-                pertemuanKe: "asc", // Order by meeting number
+                pertemuanKe: "asc",
               },
             },
           },
@@ -204,7 +204,7 @@ export const getAsdosByUserId = async (userId: string) => {
 // ------------------------ UPDATE FUNCTION ------------------------
 export const updateAsdos = async (
   npm: string,
-  data: FormDataUpdatePendaftar
+  data: FormDataUpdatePendaftar,
 ) => {};
 
 // ------------------------ DELETE FUNCTION ------------------------
@@ -212,8 +212,8 @@ export const updateAsdos = async (
 export const deleteAsdos = async (npm: string) => {
   try {
     await prisma.asdos.delete({ where: { npm } });
-    updateTag("asdos");
-    updateTag(`asdos-${npm}`);
+    revalidateTag("asdos");
+    revalidateTag(`asdos-${npm}`);
     return { success: "Data berhasil dihapus" };
   } catch {
     return { error: "Data gagal dihapus" };
@@ -223,9 +223,9 @@ export const deleteAsdos = async (npm: string) => {
 export const deleteClassAsdos = async (id: string, npm: string) => {
   try {
     await prisma.classAsdos.delete({ where: { id } });
-    updateTag("asdos");
-    updateTag(`asdos-${npm}`);
-    updateTag(`class-asdos-${id}`);
+    revalidateTag("asdos");
+    revalidateTag(`asdos-${npm}`);
+    revalidateTag(`class-asdos-${id}`);
     return { success: "Data berhasil dihapus" };
   } catch {
     return { error: "Data gagal dihapus" };

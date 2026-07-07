@@ -9,6 +9,7 @@ import { TSignUpAsdosSchema, TSignUpSchema } from "@/lib/types";
 import { signUpAsdosSchema, signUpSchema } from "@/lib/zod";
 import bcryptjs from "bcryptjs";
 import { updateTag } from "next/cache";
+import { auth, signOut } from "@/auth"; // 💡 PERBAIKAN 1: Tambahkan import signOut
 
 export async function signUpAsdos(data: TSignUpAsdosSchema) {
   const validatedFields = signUpAsdosSchema.safeParse(data);
@@ -20,7 +21,7 @@ export async function signUpAsdos(data: TSignUpAsdosSchema) {
   const now = new Date();
   const activePeriod = await prisma.oprecDetails.findFirst({
     where: {
-      status: true, // Master switch harus aktif (BUKA)
+      status: true,
       OR: [
         {
           recStart: { lte: now },
@@ -39,16 +40,32 @@ export async function signUpAsdos(data: TSignUpAsdosSchema) {
   }
 
   const {
-    name, email, password, confirmPassword, npm, whatsapp, domisili,
-    matkul1, matkul2, wawancara, alasanOnline, alasan,
-    bersediaDuaMatkul, pengalamanAsdos, bersediaDitempatkanLain, suratPernyataan,
+    name,
+    email,
+    password,
+    confirmPassword,
+    npm,
+    whatsapp,
+    domisili,
+    matkul1,
+    matkul2,
+    wawancara,
+    alasanOnline,
+    alasan,
+    bersediaDuaMatkul,
+    pengalamanAsdos,
+    bersediaDitempatkanLain,
+    suratPernyataan,
   } = data;
 
-  if (!suratPernyataan) return { error: "File surat pernyataan tidak ditemukan." };
+  if (!suratPernyataan)
+    return { error: "File surat pernyataan tidak ditemukan." };
 
-  // PERBAIKAN 1: Mengubah validasi angkatan menjadi dinamis berdasarkan konfigurasi admin di DB
+  // Validasi opsi wawancara angkatan dinamis
   if (!npm.startsWith(activePeriod.angkatanOnline) && wawancara === "online") {
-    return { error: `Wawancara online hanya diizinkan untuk angkatan ${activePeriod.angkatanOnline}!` };
+    return {
+      error: `Wawancara online hanya diizinkan untuk angkatan ${activePeriod.angkatanOnline}!`,
+    };
   }
 
   if (password !== confirmPassword) {
@@ -56,33 +73,85 @@ export async function signUpAsdos(data: TSignUpAsdosSchema) {
   }
 
   try {
-    const emailExists = await getUserByEmail(email);
-    if (emailExists) return { error: "Email sudah terdaftar" };
+    let userId = "";
+    let isNewUser = false;
+    let shouldVerifyEmail = false;
 
-    const hashedPassword = await bcryptjs.hash(password, 10);
+    // Ambil data session server & pastikan kecocokan email
+    const session = await auth();
+    const isSessionUser = session?.user?.email === email;
 
-    const user = await prisma.user.create({
-      data: { name, email, password: hashedPassword, role: "CALON_ASDOS" },
-    });
+    // 2. Cek apakah Email sudah terdaftar di sistem (User Lama)
+    const existingUser = await prisma.user.findUnique({ where: { email } });
 
-    // Upload File Ke Google Drive
+    if (existingUser) {
+      // ALUR DAFTAR ULANG (KONDISIONAL)
+      if (!isSessionUser) {
+        const isPasswordMatch = await bcryptjs.compare(
+          password,
+          existingUser.password,
+        );
+        if (!isPasswordMatch) {
+          return {
+            error:
+              "Email sudah terdaftar dengan password berbeda. Silakan masukkan password akun Anda dengan benar atau gunakan menu Masuk.",
+          };
+        }
+      }
+
+      userId = existingUser.id;
+
+      // Otomatis naikkan role menjadi CALON_ASDOS jika akun lama bukan ADMIN/DOSEN
+      if (existingUser.role !== "ADMIN" && existingUser.role !== "DOSEN") {
+        await prisma.user.update({
+          where: { id: existingUser.id },
+          data: { role: "CALON_ASDOS" },
+        });
+        updateTag("user");
+      }
+
+      // Jika akun lama ternyata belum pernah diverifikasi emailnya, tandai untuk verifikasi ulang
+      if (!existingUser.emailVerified) {
+        shouldVerifyEmail = true;
+      }
+    } else {
+      // ALUR USER BARU: Daftarkan User baru ke database
+      const hashedPassword = await bcryptjs.hash(password, 10);
+      const newUser = await prisma.user.create({
+        data: { name, email, password: hashedPassword, role: "CALON_ASDOS" },
+      });
+
+      userId = newUser.id;
+      isNewUser = true;
+      shouldVerifyEmail = true;
+    }
+
+    // 3. Upload File Ke Google Drive
     const fileName = `${npm}_${name.split(" ").join("_").toLowerCase()}.pdf`;
     const folderId = process.env.GOOGLE_DRIVE_FOLDER_SURAT_PERNYATAAN_ID;
-    if (!folderId) return { error: "Folder penyimpanan tidak ditemukan" };
 
-    const responseUpload = await uploadFileToDrive(suratPernyataan, fileName, folderId);
+    if (!folderId) {
+      if (isNewUser) await prisma.user.delete({ where: { id: userId } });
+      return { error: "Folder penyimpanan tidak ditemukan" };
+    }
+
+    const responseUpload = await uploadFileToDrive(
+      suratPernyataan,
+      fileName,
+      folderId,
+    );
     if (responseUpload.error || !responseUpload.data?.id) {
-      await prisma.user.delete({ where: { id: user.id } });
+      if (isNewUser) await prisma.user.delete({ where: { id: userId } });
       return { error: "Gagal upload file" };
     }
 
-    // PERBAIKAN 2: Menyertakan oprecDetailsId agar sesuai dengan skema relasi baru database
+    // 4. Buat Record Aplikasi Pendaftaran Baru (AsdosApplication)
     const application = await prisma.asdosApplication.create({
       data: {
         fileId: responseUpload.data.id,
-        userId: user.id,
+        userId: userId,
         npm,
-        email, 
+        email,
         whatsapp,
         domisili,
         wawancara,
@@ -91,28 +160,50 @@ export async function signUpAsdos(data: TSignUpAsdosSchema) {
         bersediaDuaMatkul,
         pengalamanAsdos,
         bersediaDitempatkanLain,
-        oprecDetailsId: activePeriod.id, // Menghubungkan aplikasi pendaftar dengan id periode aktif
+        oprecDetailsId: activePeriod.id,
       },
     });
 
-    // Hubungkan dengan pilihan mata kuliah pendaftar
+    // 5. Hubungkan pilihan mata kuliah pendaftar (Aman untuk 1 atau 2 matkul)
+    const courseSelections = [
+      { asdosApplicationId: application.id, courseId: matkul1 },
+    ];
+    if (matkul2) {
+      courseSelections.push({
+        asdosApplicationId: application.id,
+        courseId: matkul2,
+      });
+    }
+
     await prisma.courseApplication.createMany({
-      data: [
-        { asdosApplicationId: application.id, courseId: matkul1 },
-        { asdosApplicationId: application.id, courseId: matkul2 }
-      ]
+      data: courseSelections,
     });
 
-    const verificationToken = await generateVerificationToken(email);
-    await sendVerificationEmail(verificationToken.email, verificationToken.token);
+    // 💡 PERBAIKAN 2: Hancurkan sesi login di browser pendaftar agar kembali menjadi guest bersih
+    await signOut({ redirect: false });
 
-    return { success: "Berhasil daftar! Silakan verifikasi email Anda." };
-
-  } catch (error: any) {
-    if (error.code === 'P2002') {
-      return { error: "Anda sudah mendaftar untuk periode ini." };
+    // 6. Tangani Sistem Verifikasi Email Berdasarkan Tipe Pendaftar
+    if (shouldVerifyEmail) {
+      const verificationToken = await generateVerificationToken(email);
+      await sendVerificationEmail(
+        verificationToken.email,
+        verificationToken.token,
+      );
+      return { success: "Berhasil daftar! Silakan verifikasi email Anda." };
     }
-    
+
+    return {
+      success:
+        "Pendaftaran ulang berhasil disimpan! Data lamaran baru Anda telah dicatat.",
+    };
+  } catch (error: any) {
+    if (error.code === "P2002") {
+      return {
+        error:
+          "Anda sudah mengirimkan pendaftaran untuk periode oprec aktif ini.",
+      };
+    }
+
     const errorMessage = error instanceof Error ? error.message : String(error);
     return { error: errorMessage };
   }
@@ -154,7 +245,6 @@ export async function signUp(data: TSignUpSchema) {
 
     updateTag("user");
 
-    // PERBAIKAN 3: Pembersihan total blok duplikasi copy-paste pada registrasi npm asdos lama
     if (npm) {
       const asdosExists = await prisma.asdos.findFirst({
         where: { npm },
