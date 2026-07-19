@@ -237,28 +237,28 @@ const getVerificationEmailTemplate = (
                 <div class="logo">🎓 Badan Khusus Himakom</div>
                 <div class="subtitle">Badan Khusus Himakom - Mengelola Asisten Dosen Jurusan Ilmu Komputer</div>
             </div>
-            
+
             <div class="content">
                 <h1 class="welcome-title">Selamat Datang! 🎉</h1>
                 <p class="welcome-text">
-                    Terima kasih telah mendaftar di <strong>Badan Khusus Himakom</strong>. 
+                    Terima kasih telah mendaftar di <strong>Badan Khusus Himakom</strong>.
                     Kami senang Anda bergabung dengan komunitas kami!
                 </p>
                 <p class="welcome-text">
                     Email Anda: <span class="email-highlight">${userEmail}</span>
                 </p>
-                
+
                 <div class="verify-section">
                     <div class="verify-icon">🔐</div>
                     <p class="verify-text">
-                        Untuk mengaktifkan akun Anda dan mulai menggunakan layanan kami, 
+                        Untuk mengaktifkan akun Anda dan mulai menggunakan layanan kami,
                         silakan verifikasi alamat email Anda dengan mengklik tombol di bawah ini:
                     </p>
                     <a href="${confirmLink}" class="verify-button">
                         ✅ Verifikasi Email Saya
                     </a>
                 </div>
-                
+
                 <div class="security-note">
                     <div class="security-title">
                         <span>🛡️</span>
@@ -270,7 +270,7 @@ const getVerificationEmailTemplate = (
                         • Jangan bagikan link ini kepada siapa pun
                     </p>
                 </div>
-                
+
                 <p class="welcome-text">
                     <strong>Tidak bisa mengklik tombol?</strong> Salin dan tempel link berikut ke browser Anda:
                 </p>
@@ -278,7 +278,7 @@ const getVerificationEmailTemplate = (
                     ${confirmLink}
                 </div>
             </div>
-            
+
             <div class="footer">
                 <h3 class="footer-title">Badan Khusus Himakom</h3>
                 <p class="footer-text">
@@ -555,7 +555,7 @@ const getPasswordResetEmailTemplate = (
                 <div class="logo">🔒 Badan Khusus Himakom</div>
                 <div class="subtitle">Reset Password Request</div>
             </div>
-            
+
             <div class="content">
                 <h1 class="alert-title">Reset Password 🔑</h1>
                 <p class="alert-text">
@@ -564,18 +564,18 @@ const getPasswordResetEmailTemplate = (
                 <p class="alert-text">
                     Email: <span class="email-highlight">${userEmail}</span>
                 </p>
-                
+
                 <div class="reset-section">
                     <div class="reset-icon">🔐</div>
                     <p class="reset-text">
-                        Jika Anda memang ingin mereset password, silakan klik tombol di bawah ini. 
+                        Jika Anda memang ingin mereset password, silakan klik tombol di bawah ini.
                         Anda akan diarahkan ke halaman untuk membuat password baru.
                     </p>
                     <a href="${confirmLink}" class="reset-button">
                         🔄 Reset Password Saya
                     </a>
                 </div>
-                
+
                 <div class="security-warning">
                     <div class="warning-title">
                         <span>⚠️</span>
@@ -587,16 +587,16 @@ const getPasswordResetEmailTemplate = (
                         • Pastikan Anda membuat password yang kuat dan mudah diingat
                     </p>
                 </div>
-                
+
                 <div class="not-you-section">
                     <div class="not-you-title">Bukan Anda yang meminta reset password?</div>
                     <p class="not-you-text">
-                        Jika Anda tidak meminta reset password, abaikan email ini. 
-                        Akun Anda tetap aman dan password tidak akan berubah. 
+                        Jika Anda tidak meminta reset password, abaikan email ini.
+                        Akun Anda tetap aman dan password tidak akan berubah.
                         Namun, kami menyarankan untuk mengubah password jika Anda merasa ada yang mencurigakan.
                     </p>
                 </div>
-                
+
                 <p class="alert-text">
                     <strong>Tidak bisa mengklik tombol?</strong> Salin dan tempel link berikut ke browser Anda:
                 </p>
@@ -604,7 +604,7 @@ const getPasswordResetEmailTemplate = (
                     ${confirmLink}
                 </div>
             </div>
-            
+
             <div class="footer">
                 <h3 class="footer-title">Badan Khusus Himakom</h3>
                 <p class="footer-text">
@@ -633,7 +633,7 @@ export const sendVerificationEmail = async (email: string, token: string) => {
 
   try {
     await resend.emails.send({
-      from: "badankhusus2025@bansus.my.id",
+      from: "badankhusus2025@beta.bansus.my.id",
       to: [email],
       subject: "🎓 Verifikasi Email Anda - Badan Khusus Himakom",
       html: getVerificationEmailTemplate(confirmLink, email),
