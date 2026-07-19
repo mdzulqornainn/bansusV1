@@ -44,6 +44,7 @@ export default function FosiPage() {
         <div className="max-w-4xl mx-auto">
           <HeroSection
             badgeText="Sistem Digitalisasi Badan Khusus"
+            badgeIcon={<Zap className="w-4 h-4" />}
             title={
               <>
                 FoSi 2 <span className={theme.text_gradient}>Asisten Dosen</span>
