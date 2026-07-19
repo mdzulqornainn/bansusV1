@@ -35,6 +35,7 @@ const LandingBansusPage = () => {
         <div className="max-w-7xl mx-auto">
           <HeroSection
             badgeText="Sistem Digitalisasi Badan Khusus"
+            badgeIcon={<Zap className="w-4 h-4" />}
             title={
               <>
                 Sistem <span className={theme.text_gradient}>Management</span><br />

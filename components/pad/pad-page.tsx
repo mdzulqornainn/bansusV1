@@ -47,6 +47,7 @@ const PadPage = () => {
         <div className="max-w-4xl mx-auto">
           <HeroSection
             badgeText="Sistem Pelatihan Digital"
+            badgeIcon={<Zap className="w-4 h-4" />}
             title={
               <>
                 Pelatihan <br />
