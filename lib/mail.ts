@@ -633,7 +633,7 @@ export const sendVerificationEmail = async (email: string, token: string) => {
 
   try {
     await resend.emails.send({
-      from: "badankhusus2025@beta.bansus.my.id",
+      from: "badankhusus@beta.bansus.my.id", //sesuaikan dengan domain
       to: [email],
       subject: "🎓 Verifikasi Email Anda - Badan Khusus Himakom",
       html: getVerificationEmailTemplate(confirmLink, email),
@@ -650,7 +650,7 @@ export const sendPasswordResetEmail = async (email: string, token: string) => {
 
   try {
     await resend.emails.send({
-      from: "badankhusus2025@bansus.my.id",
+      from: "badankhusus@beta.bansus.my.id", //sesuaikan dengan domain
       to: email,
       subject: "🔒 Reset Password - Badan Khusus Himakom",
       html: getPasswordResetEmailTemplate(confirmLink, email),

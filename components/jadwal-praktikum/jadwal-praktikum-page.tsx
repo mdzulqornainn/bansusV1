@@ -306,7 +306,7 @@ const JadwalPraktikumPage = ({ dataClasses }: JadwalPraktikumPageProps) => {
       }
     `}</style>
     <div className="absolute inset-0 unila-dot-matrix pointer-events-none z-[-1]"></div>
-    
+
       {/* Header Section */}
       <div className="mb-8 mt-4">
         <div className="flex items-center gap-3 mb-4">
@@ -318,7 +318,7 @@ const JadwalPraktikumPage = ({ dataClasses }: JadwalPraktikumPageProps) => {
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className={`${theme.card_small_blue}`}>
+          <div className={`${theme.card_default} rounded-xl `}>
             <div className="flex items-center gap-3">
               <BookOpen className={`h-6 w-6 ${theme.text_title}`} />
               <div>
@@ -330,7 +330,7 @@ const JadwalPraktikumPage = ({ dataClasses }: JadwalPraktikumPageProps) => {
             </div>
           </div>
 
-          <div className={`${theme.card_small_blue}`}>
+          <div className={`${theme.card_default} rounded-xl`}>
             <div className="flex items-center gap-3">
               <Users className={`h-6 w-6 ${theme.text_title}`} />
               <div>
@@ -342,7 +342,7 @@ const JadwalPraktikumPage = ({ dataClasses }: JadwalPraktikumPageProps) => {
             </div>
           </div>
 
-          <div className={`${theme.card_small_blue}`}>
+          <div className={`${theme.card_default} rounded-xl`}>
             <div className="flex items-center gap-3">
               <GraduationCap className={`h-6 w-6 ${theme.text_title}`} />
               <div>
@@ -394,7 +394,7 @@ const JadwalPraktikumPage = ({ dataClasses }: JadwalPraktikumPageProps) => {
 
             <button
               onClick={downloadExcel}
-              className={`flex cursor-pointer items-center gap-2 text-green-900 ${theme.card_small_green}`}
+              className={`flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors duration-200 shadow-sm`}
             >
               <FileSpreadsheet size={16} />
               Export Excel

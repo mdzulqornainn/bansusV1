@@ -1,134 +1,100 @@
 "use client";
 
 import { theme } from "@/lib/theme";
+import { BookOpen, FileText, MapPin, Zap } from "lucide-react";
+import BackgroundEffects from "@/components/ui/BackgroundEffects";
+import { FeatureCard } from "@/components/ui/FeatureCard";
+import { StatCard } from "@/components/ui/StatCard";
+import { HeroSection } from "@/components/ui/HeroSection";
+
 
 const PadPage = () => {
+  const infoData = [
+    { progja: "Hari/Tanggal", label: "13 Agustus 2025", color: "bg-blue-500" },
+    { progja: "Waktu", label: "08:30 WIB", color: "bg-sky-500" },
+    { progja: "Lokasi", label: "Ruang GIK L1 C", color: "bg-emerald-500" },
+    { progja: "Dresscode", label: "Kemeja Rapih", color: "bg-amber-500" },
+  ];
+
+  // Ikon disederhanakan tanpa hardcoded color agar mengikuti theme.ts
+  const materiData = [
+    {
+      icon: <FileText size={24} />,
+      title: "Tutorial Vclass",
+      description: "Panduan lengkap penggunaan Vclass untuk menunjang kegiatan asistensi.",
+      href: "https://www.aryadzar.my.id/blog/tutorial-vclass-untuk-asisten-8335523070470254305"
+    },
+    {
+      icon: <BookOpen size={24} />,
+      title: "Ngasdos itu Sulit gak ya?",
+      description: "Materi utama mengenai tugas, tanggung jawab, dan tips menjadi asisten dosen.",
+      href: "/files/materi-pelasdos-2025.pdf"
+    },
+    {
+      icon: <MapPin size={24} />,
+      title: "Peraturan Lab",
+      description: "Informasi penting seputar peraturan lab dan skema konversi nilai asistensi.",
+      href: "/files/materi-bansus.pdf"
+    },
+  ];
+
   return (
-    <main className="min-h-screen flex flex-col items-center text-center px-6 py-12 relative z-10 space-y-16">
-      {/* Background pattern */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%2240%22 viewBox=%220 0 40 40%22><circle cx=%222%22 cy=%222%22 r=%221%22 fill=%22%23bfdbfe%22 opacity=%220.12%22/></svg>')] pointer-events-none" />
+    <div className={`min-h-screen relative isolate overflow-x-hidden ${theme.root_background} pb-24`}>
+      <BackgroundEffects />
 
-      {/* Gradient circles */}
-      {/* <div className="absolute top-0 left-0 w-72 h-72 bg-blue-300/20 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-200/20 rounded-full blur-3xl animate-pulse" /> */}
+      {/* Hero Section */}
+      <section className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 text-center relative z-10">
+        <div className="max-w-4xl mx-auto">
+          <HeroSection
+            badgeText="Sistem Pelatihan Digital"
+            title={
+              <>
+                Pelatihan <br />
+                <span className={theme.text_gradient}>Asisten Dosen</span>
+              </>
+            }
+            description="Membangun Profesionalisme dan Kompetensi Asisten Dosen dalam mendukung Kualitas Pembelajaran yang Aktif dan Kolaboratif"
+          />
 
-      <header className="relative z-10 m-10">
-        <h1
-          className={`sm:text-5xl text-3xl font-extrabold mb-4 tracking-tight ${theme.text_title}`}
-        >
-          📚 Pelatihan Asisten Dosen 2025 📚
-        </h1>
-        <p
-          className={`sm:text-2xl text-xl italic ${theme.text_default} mb-8 max-w-4xl mx-auto`}
-        >
-          &quot;Membangun Profesionalisme dan Kompetensi Asisten Dosen dalam
-          mendukung Kualitas Pembelajaran yang Aktif dan Kolaboratif&quot;
-        </p>
-      </header>
-
-      {/* Info section */}
-      <section className="flex flex-wrap justify-center gap-4 relative z-10">
-        <span
-          className={`${theme.hover_glow_light} px-6 py-3 rounded-full ${theme.text_title}`}
-        >
-          📅 Rabu, 13 Agustus 2025
-        </span>
-
-        <span
-          className={`${theme.hover_glow_light} px-6 py-3 rounded-full ${theme.text_title}`}
-        >
-          ⏰ 08:30 WIB - Selesai
-        </span>
-
-        <a
-          href="https://maps.app.goo.gl/8ewDKWKvJxmrWdvdA"
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`${theme.table_highlight} ${theme.hover_glow_light} px-6 py-3 rounded-full ${theme.text_title}`}
-        >
-          📍 Ruang GIK L1 C
-        </a>
-
-        <span
-          className={`${theme.hover_glow_light} px-6 py-3 rounded-full ${theme.text_title}`}
-        >
-          👔 Dress Code: Kemeja bebas, rapi, sopan
-        </span>
-      </section>
-
-      {/* Wajib hadir */}
-      <div className={`${theme.status_warning}`}>
-        ⚠ <strong>WAJIB</strong> hadir bagi seluruh Asisten Dosen Semester
-        Ganjil 2025/2026 yang belum pernah menjadi asisten sebelumnya.
-      </div>
-
-      {/* Materi pelatihan */}
-      <section className="w-full max-w-5xl relative z-10">
-        <h3
-          className={`font-bold text-3xl mb-8 ${theme.text_title} drop-shadow`}
-        >
-          📂 Materi Pelatihan
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          {/* Materi 1 - Preview PDF */}
-          <a
-            href="https://www.aryadzar.my.id/blog/tutorial-vclass-untuk-asisten-8335523070470254305"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`${theme.table_highlight} ${theme.hover_glow_light} rounded-xl p-6 ${theme.card_shadow} hover:shadow-lg transition`}
-          >
-            <div className="text-5xl mb-4">📄</div>
-            <h4 className={`text-xl font-bold mb-2 ${theme.text_title}`}>
-              Tutorial Vclass
-            </h4>
-            {/* --- DESKRIPSI DIPERBAIKI --- */}
-            <p className={`${theme.text_default}`}>
-              Panduan lengkap penggunaan Vclass untuk menunjang kegiatan
-              asistensi.
-            </p>
-          </a>
-
-          {/* Materi 2 - PDF */}
-          <a
-            href="/files/materi-pelasdos-2025.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`${theme.table_highlight} ${theme.hover_glow_light} rounded-xl p-6 ${theme.card_shadow} hover:shadow-lg transition`}
-          >
-            <div className="text-5xl mb-4">📕</div>
-            <h4 className={`text-xl font-bold mb-2 ${theme.text_title}`}>
-              Ngasdos itu Sulit gak ya?
-            </h4>
-            <p className={`${theme.text_default}`}>
-              Materi utama mengenai tugas, tanggung jawab, dan tips menjadi
-              asisten dosen.
-            </p>
-          </a>
-
-          {/* Materi 3 - PDF */}
-          <a
-            href="/files/materi-bansus.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`${theme.table_highlight} ${theme.hover_glow_light} rounded-xl p-6 ${theme.card_shadow} hover:shadow-lg transition`}
-          >
-            <div className="text-5xl mb-4">📊</div>
-            <h4 className={`text-xl font-bold mb-2 ${theme.text_title}`}>
-              Peraturan Lab dan Konversi
-            </h4>
-            <p className={`${theme.text_default}`}>
-              Informasi penting seputar peraturan lab dan skema konversi nilai
-              asistensi.
-            </p>
-          </a>
+          <div className="flex flex-wrap justify-center gap-4 mb-16">
+            {infoData.map((stat, index) => (
+              <div key={index} className="w-full sm:w-[220px]">
+                <StatCard {...stat} />
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className={`text-lg ${theme.text_default} pb-10 relative z-10`}>
+      {/* Warning Section */}
+      <section className="px-4 mb-16 flex justify-center">
+        <div className={`${theme.status_warning} max-w-3xl flex items-center gap-3`}>
+          <span>⚠</span>
+          <p><strong>WAJIB</strong> hadir bagi seluruh Asisten Dosen Semester Ganjil 2025/2026 yang belum pernah menjadi asisten sebelumnya.</p>
+        </div>
+      </section>
+
+      {/* Materi Pelatihan Section */}
+      <section id="materi" className="py-8 px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <h3 className={`font-bold text-3xl ${theme.text_title}`}>
+              📂 Materi Pelatihan
+            </h3>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {materiData.map((item, index) => (
+              <FeatureCard key={index} {...item} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <footer className={`text-center pt-10 relative z-10 ${theme.text_default}`}>
         <p>Terima kasih atas perhatian dan partisipasinya.</p>
       </footer>
-    </main>
+    </div>
   );
 };
 
