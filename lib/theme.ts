@@ -36,16 +36,20 @@ export const theme = {
     card_landing_description: "text-sm text-slate-500 text-justify leading-relaxed font-medium",
 
     // Tambahkan ke dalam objek theme
-    card_stat: "bg-white/60 backdrop-blur-md border border-white/60 rounded-2xl p-5 shadow-[0_4px_20px_rgba(11,94,168,0.03)] flex flex-col justify-between items-center text-center group hover:border-[#0B5EA8]/20 transition-all duration-300 hover:scale-[1.02]",
+    card_stat: "bg-white/60 backdrop-blur-md border border-white/60 rounded-xl px-3 py-3 shadow-[0_4px_20px_rgba(11,94,168,0.03)] flex flex-col justify-between items-center text-center group hover:border-[#0B5EA8]/20 transition-all duration-300 hover:scale-[1.02]",
 
   // ...
 
   // HERO
   // Tambahkan ke dalam objek theme
-  hero_badge: "inline-flex items-center bg-white/80 border border-slate-200/80 rounded-full px-5 py-1.5 mb-8 backdrop-blur shadow-sm hover:border-[#0B5EA8]/30 transition-all",
+  // Tambahkan ke dalam objek theme
+  hero_badge: "inline-flex items-center gap-2 bg-gradient-to-r from-[#0B5EA8] to-cyan-600 rounded-full px-6 py-3 mb-8 backdrop-blur shadow-lg border border-white/20 animate-in fade-in slide-in-from-top-4 duration-700",
   hero_heading: "text-5xl md:text-7xl font-extrabold text-slate-800 tracking-tight mb-6 leading-[1.15]",
-  hero_description: "text-lg md:text-xl text-slate-500 mb-14 max-w-2xl mx-auto leading-relaxed font-medium italic",
+  hero_description: "text-lg md:text-xl text-slate-500 mb-2 max-w-2xl mx-auto leading-relaxed font-medium italic",
   text_gradient: "bg-gradient-to-r from-[#0B5EA8] to-cyan-600 bg-clip-text text-transparent",
+
+  // Container Wrapper
+  container_wrapper: "max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10",
 
 
  // status

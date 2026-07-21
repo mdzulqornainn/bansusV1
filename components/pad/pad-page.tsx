@@ -1,12 +1,11 @@
 "use client";
 
 import { theme } from "@/lib/theme";
-import { BookOpen, FileText, MapPin, Zap } from "lucide-react";
+import { Zap, FileText, HelpCircle, Shield } from "lucide-react";
 import BackgroundEffects from "@/components/ui/BackgroundEffects";
-import { FeatureCard } from "@/components/ui/FeatureCard";
-import { StatCard } from "@/components/ui/StatCard";
 import { HeroSection } from "@/components/ui/HeroSection";
-
+import { StatCard } from "@/components/ui/StatCard";
+import { FeatureCard } from "@/components/ui/FeatureCard";
 
 const PadPage = () => {
   const infoData = [
@@ -16,74 +15,66 @@ const PadPage = () => {
     { progja: "Dresscode", label: "Kemeja Rapih", color: "bg-amber-500" },
   ];
 
-  // Ikon disederhanakan tanpa hardcoded color agar mengikuti theme.ts
   const materiData = [
     {
-      icon: <FileText size={24} />,
+      icon: <FileText className="w-6 h-6 text-blue-500" />,
       title: "Tutorial Vclass",
-      description: "Panduan lengkap penggunaan Vclass untuk menunjang kegiatan asistensi.",
-      href: "https://www.aryadzar.my.id/blog/tutorial-vclass-untuk-asisten-8335523070470254305"
+      description: "Panduan lengkap penggunaan Vclass."
     },
     {
-      icon: <BookOpen size={24} />,
+      icon: <HelpCircle className="w-6 h-6 text-sky-500" />,
       title: "Ngasdos itu Sulit gak ya?",
-      description: "Materi utama mengenai tugas, tanggung jawab, dan tips menjadi asisten dosen.",
-      href: "/files/materi-pelasdos-2025.pdf"
+      description: "Materi utama mengenai tugas asisten dosen."
     },
     {
-      icon: <MapPin size={24} />,
+      icon: <Shield className="w-6 h-6 text-emerald-500" />,
       title: "Peraturan Lab",
-      description: "Informasi penting seputar peraturan lab dan skema konversi nilai asistensi.",
-      href: "/files/materi-bansus.pdf"
+      description: "Informasi seputar peraturan lab."
     },
   ];
 
   return (
-    <div className={`min-h-screen relative isolate overflow-x-hidden ${theme.root_background} pb-24`}>
+    <div className={`min-h-screen relative isolate overflow-x-hidden ${theme.root_background}`}>
       <BackgroundEffects />
 
-      {/* Hero Section */}
-      <section className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 text-center relative z-10">
-        <div className="max-w-4xl mx-auto">
-          <HeroSection
-            badgeText="Sistem Pelatihan Digital"
-            badgeIcon={<Zap className="w-4 h-4" />}
-            title={
-              <>
-                Pelatihan <br />
-                <span className={theme.text_gradient}>Asisten Dosen</span>
-              </>
-            }
-            description="Membangun Profesionalisme dan Kompetensi Asisten Dosen dalam mendukung Kualitas Pembelajaran yang Aktif dan Kolaboratif"
-          />
-
-          <div className="flex flex-wrap justify-center gap-4 mb-16">
-            {infoData.map((stat, index) => (
-              <div key={index} className="w-full sm:w-[220px]">
-                <StatCard {...stat} />
-              </div>
-            ))}
-          </div>
+      {/* Hero Section yang Memuat Stat Card di dalamnya */}
+      <HeroSection
+        badgeText="Sistem Pelatihan Digital"
+        badgeIcon={<Zap className="w-4 h-4 text-white" />}
+        title={
+          <>
+            Pelatihan <br />
+            <span className={theme.text_gradient}>Asisten Dosen</span>
+          </>
+        }
+        description="Membangun Profesionalisme dan Kompetensi Asisten Dosen dalam mendukung Kualitas Pembelajaran yang Aktif dan Kolaboratif"
+        showScrollDown={true}
+        scrollTargetId="materi"
+      >
+        {/* Stat Card dimasukkan ke dalam Hero Section */}
+        <div className="flex flex-wrap justify-center gap-3">
+          {infoData.map((stat, index) => (
+            <div key={index} className="w-[170px] sm:w-[190px]">
+              <StatCard {...stat} />
+            </div>
+          ))}
         </div>
-      </section>
+      </HeroSection>
 
       {/* Warning Section */}
-      <section className="px-4 mb-16 flex justify-center">
-        <div className={`${theme.status_warning} max-w-3xl flex items-center gap-3`}>
+      <section className={`${theme.container_wrapper} my-12 flex justify-center`}>
+        <div className={`${theme.status_warning} w-full max-w-3xl flex items-center gap-3`}>
           <span>⚠</span>
-          <p><strong>WAJIB</strong> hadir bagi seluruh Asisten Dosen Semester Ganjil 2025/2026 yang belum pernah menjadi asisten sebelumnya.</p>
+          <p><strong>WAJIB</strong> hadir bagi seluruh Asisten Dosen Semester Ganjil...</p>
         </div>
       </section>
 
-      {/* Materi Pelatihan Section */}
-      <section id="materi" className="py-8 px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="max-w-5xl mx-auto">
+      {/* Materi Section */}
+      <section id="materi" className="py-12">
+        <div className={theme.container_wrapper}>
           <div className="text-center mb-12">
-            <h3 className={`font-bold text-3xl ${theme.text_title}`}>
-              📂 Materi Pelatihan
-            </h3>
+            <h3 className={`font-bold text-3xl ${theme.text_title}`}>📂 Materi Pelatihan</h3>
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {materiData.map((item, index) => (
               <FeatureCard key={index} {...item} />
@@ -91,10 +82,6 @@ const PadPage = () => {
           </div>
         </div>
       </section>
-
-      <footer className={`text-center pt-10 relative z-10 ${theme.text_default}`}>
-        <p>Terima kasih atas perhatian dan partisipasinya.</p>
-      </footer>
     </div>
   );
 };
